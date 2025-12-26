@@ -1,0 +1,1236 @@
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Vigilancia CCR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Definir colores personalizados de la paleta */
+        :root {
+            --color-primary-blue: #0A1C40; /* Azul oscuro del logo DIGESTIVO */
+            --color-secondary-teal: #007D70; /* Verde/Teal del logo Clínico */
+            --color-accent-red: #D53B3E; /* Rojo del estómago del logo DIGE */
+        }
+        
+        /* Aplicar la fuente Poppins para un estilo más moderno y corporativo */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8; /* Fondo más suave para que el 'móvil' destaque */
+        }
+
+        /* Estilos para el contenedor principal de la calculadora */
+        .card-container {
+            border: 1px solid var(--color-secondary-teal);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Sobrescribir estilos de Tailwind para inputs y botones para usar los colores corporativos */
+        input:focus, button.focus-ring {
+            border-color: var(--color-secondary-teal) !important;
+            box-shadow: 0 0 0 3px rgba(0, 125, 112, 0.4) !important;
+        }
+        
+        /* Estilo para los elementos deshabilitados (mejor contraste) */
+        input:disabled, label.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- ESTILOS PARA COLONCALC (SOLICITADOS) --- */
+        .coloncalc-main-title {
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            color: #006400; 
+            line-height: 1; 
+            letter-spacing: -0.05em; 
+        }
+        .coloncalc-main-title span {
+            color: #228B22; 
+            font-weight: 600; 
+            letter-spacing: normal; 
+        }
+        .coloncalc-subtitle {
+            font-size: 1.1em; 
+            color: #00008B; 
+            margin-top: 0.5rem; 
+            font-weight: 500; 
+        }
+        /* --- FIN ESTILOS COLONCALC --- */
+
+        /* --- ESTILOS PARA LA VENTANA MODAL (AYUDA SPS) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 50; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .modal-content h3 {
+            color: var(--color-secondary-teal);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        .modal-content ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+        .modal-content li {
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+        #aboutModal video{
+            width: 85%;
+            max-width: 280px;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto 12px auto;
+        }
+        #aboutModal .modal-content modal-large {
+            max-width: 420px;
+            width: 90%;
+        }
+        .about-text {
+            text-align: justify;
+        }
+        /* --- ESTILOS PARA LA MODAL DE ERROR (NUEVOS) --- */
+        #errorModal .error-modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 350px; /* Más pequeño para ser un aviso puntual */
+            box-shadow: 0 0 30px rgba(213, 59, 62, 0.8); /* Sombra roja */
+            border: 3px solid var(--color-accent-red);
+            text-align: center;
+        }
+        
+        /* --- NUEVA CLASE PARA EL EFECTO FLASH LIMITADO --- */
+        @keyframes pulse {
+            50% { opacity: .5; }
+        }
+        .animate-flash-twice {
+            animation: pulse 1.5s ease-in-out 2; /* Repetir la animación 'pulse' 2 veces en 1.5 segundos (2 * 0.75s) */
+        }
+        /* --- FIN NUEVA CLASE --- */
+        /* --- ESTILOS ADICIONALES PARA MODALES DE IMAGEN --- */
+        .image-modal-content {
+            background-color: white;
+            padding: 12px;
+            border-radius: 12px;
+            max-width: 95%;
+            width: 550px; /* Tamaño máximo para las imágenes */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .image-modal-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        /* --- FIN ESTILOS MODALES DE IMAGEN --- */
+        /* Permite transiciones suaves al hacer zoom */
+        /* Permite transiciones suaves al hacer zoom */
+        .zoomable {
+            transition: max-width 0.3s ease-in-out; /* Cambiamos la transición a max-width */
+            cursor: zoom-in;
+            /* Aseguramos que la imagen inicia al 100% de su contenedor */
+            max-width: 100% !important; /* <--- AÑADIR !important */ 
+        }
+
+        /* Clase aplicada por JavaScript al tocar: fuerza el ancho al 200% */
+        .zoomed {
+            max-width: 200% !important; /* <--- AÑADIR !important */ 
+            cursor: zoom-out;
+        }
+        
+        /* Contenedor de Scroll DEDICADO (Método 2, el más fiable) */
+        .scroll-container-image {
+            overflow: auto;
+            max-height: 80vh; /* Para limitar la altura si la imagen es muy larga */
+        }
+
+        #calculateButton {
+            background-color: var(--color-secondary-teal) !important;
+            box-shadow: 0 6px 0 #004d45, 0 8px 15px rgba(0,0,0,0.2) !important;
+            position: relative; /* Obligatorio para que el marco no se salga */
+            transition: all 0.1s ease;
+            border: none !important;
+            cursor: pointer;
+            margin-bottom: 10px;
+            /* Aseguramos que el texto esté por encima del marco si fuera necesario */
+            z-index: 1; 
+        }
+
+        /* El recuadro blanco interior */
+        #calculateButton::after {
+            content: "";
+            position: absolute;
+            /* Ajusta estos valores para separar el marco del borde (2px, 3px...) */
+            top: 3px;
+            left: 3px;
+            right: 3px;
+            bottom: 3px;
+    
+            /* El marco blanco fino */
+            border: 1.5px solid rgba(255, 255, 255, 0.4); 
+            border-radius: 9px; /* Un poco menos que el radio del botón (12px) */
+    
+            pointer-events: none; /* Para que el clic pase a través del marco al botón */
+        }
+
+        /* Efecto al pulsar */
+        #calculateButton:active {
+            box-shadow: 0 2px 0 #004d45, 0 3px 10px rgba(0,0,0,0.2) !important;
+            transform: translateY(4px) !important;
+        }
+
+        #calculateButton:hover {
+           background-color: #008f81 !important;
+        }
+        
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center justify-start md:justify-center">
+
+    <header class="w-full max-w-md mb-6 md:mb-8 bg-white p-4 rounded-xl shadow-lg border border-gray-200">
+        <div class="flex items-center justify-between space-x-4">
+            <img src="logoclinico.png" alt="Logo Hospital Universitario Clínico San Cecilio" class="h-10 md:h-12 w-auto object-contain">
+            <img src="logodige.png" alt="Logo Digestivo" class="h-12 md:h-16 w-auto object-contain">
+        </div>
+    </header>
+
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-6 md:p-8 card-container">
+        
+        <div class="text-center mb-6">
+            
+            <h1 class="coloncalc-main-title">
+                Colon<span>Calc</span>
+            </h1>
+            <p class="coloncalc-subtitle">
+                Vigilancia pospolipectomía
+            </p>
+            
+            <p class="text-sm text-gray-500 mt-2">
+                <span class="font-semibold text-xs py-0.5 px-2 rounded-full bg-red-100 text-red-600">
+                    Basada en la guía de la ESGE 2020
+                </span>
+            </p>
+        </div>
+
+        <div id="qualityWarning" class="p-4 mb-6 bg-red-50 border border-red-300 rounded-xl text-base text-red-800 font-medium shadow-sm relative">
+            
+            <button id="openQualityHelpModal" 
+                    class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-red-300 text-red-700 hover:bg-red-100 transition focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" 
+                    type="button" title="Criterios de calidad endoscópica">
+                <span class="font-bold text-sm">?</span>
+            </button>
+            <div class="mb-1">
+            ⚠️ <span class="font-extrabold">Advertencia de Calidad:</span><br>
+            </div> 
+            <div class="text-justify">
+                Las recomendaciones son válidas si la colonoscopia basal es de <strong>calidad</strong>. Para ver los criterios de calidad, pulse sobre el 
+                símbolo <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white border border-red-300 text-red-700 font-bold text-xs leading-none relative top-0.5 ml-1 mr-1">?</span> y obtendrá también ayuda sobre 
+                la escala de limpieza y la clasificación de las lesiones encontradas.
+            </div>
+        </div>
+          
+        <div id="formContainer" class="space-y-6">
+            
+            <div>
+                <label for="totalPolyps" class="block text-base font-semibold text-gray-700 mb-1">
+                    Número total de adenomas + lesiones serradas:
+                </label>
+                <input type="number" id="totalPolyps" min="0" value="0"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary-teal)] focus:border-[var(--color-secondary-teal)] text-xl transition duration-150">
+                <p class="text-xs text-gray-500 mt-1">Incluye todos los tamaños (excepto hiperplásicos &lt;10mm en recto-sigma).</p>
+            </div>
+            
+            <div id="serratedRiskContainer" class="hidden p-4 border border-[var(--color-secondary-teal)] rounded-xl bg-teal-50 space-y-4 shadow-md">
+                
+                <div class="flex justify-between items-center">
+                    <p class="text-base font-bold text-[var(--color-secondary-teal)]">Criterios de Síndrome de Poliposis Serrada (SPS):</p>
+                    <button id="openSPSModal" class="flex items-center justify-center h-7 w-7 rounded-full bg-white border border-gray-400 text-gray-700 hover:bg-gray-100 transition duration-150 focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary-teal)] focus:ring-offset-2" type="button">
+                        <span class="font-bold text-sm">?</span>
+                    </button>
+                </div>
+                
+                <p class="text-sm font-semibold text-gray-700 pt-1 border-t border-gray-300/60">Criterio I (Proximal):</p>
+                
+                <div>
+                    <label for="numProximalSerrated5mm" class="block text-base font-medium text-gray-700 mb-1">
+                        Número de lesiones serradas proximales (LSS/TSA) <span class="font-bold">&ge; 5mm</span>:
+                    </label>
+                    <input type="number" id="numProximalSerrated5mm" min="0" value="0"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary-teal)] focus:border-[var(--color-secondary-teal)] text-lg">
+                </div>
+
+                <div id="largeSerratedProximalContainer">
+                    <label for="numProximalSerrated10mm" class="block text-base font-medium text-gray-700 mb-1">
+                        De las anteriores, ¿cuántas miden <span class="font-bold">&ge; 10mm</span>?
+                    </label>
+                    <input type="number" id="numProximalSerrated10mm" min="0" value="0"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary-teal)] focus:border-[var(--color-secondary-teal)] text-lg">
+                </div>
+
+                <p id="criterioIITitle" class="text-sm font-semibold text-gray-700 pt-2 border-t border-gray-300 hidden">Criterio II (Total):</p>
+                 <div id="criterioIITotalContainer" class="relative flex items-start hidden"> 
+                    <div class="flex items-center h-5">
+                        <input id="hasMoreThan20SerratedTotal" type="checkbox"
+                                class="h-5 w-5 text-[var(--color-secondary-teal)] border-gray-300 rounded focus:ring-[var(--color-secondary-teal)]">
+                    </div>
+                    <div class="ml-3 text-base">
+                        <label for="hasMoreThan20SerratedTotal" class="font-medium text-gray-800">¿Hay más de <span class="font-bold">20 pólipos serrados en total</span> en el colon?</label>
+                        <p class="text-xs text-gray-500">Marcar si cumple (con al menos 5 de ellos proximales).</p>
+                    </div>
+                </div>
+            </div>
+            <fieldset class="space-y-3 pt-2 border-t border-gray-200">
+                <legend class="text-base font-semibold text-gray-700 mb-3">
+                    Marque todos los hallazgos presentes:
+                </legend>
+
+                <div class="relative flex items-start p-2 bg-red-50 border border-red-200 rounded-lg">
+                    <div class="flex items-center h-5">
+                        <input id="isPT1" type="checkbox"
+                                class="h-5 w-5 text-[var(--color-accent-red)] border-gray-300 rounded focus:ring-[var(--color-accent-red)]">
+                    </div>
+                    <div class="ml-3 text-base">
+                        <label for="isPT1" class="font-bold text-[var(--color-accent-red)]">Lesión pT1 (Cáncer invasivo)</label>
+                        <p class="text-xs text-gray-500">Si la anatomía patológica reporta invasión submucosa focal (T1).</p>
+                    </div>
+                </div>
+                
+                <div class="relative flex items-start p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-center h-5">
+                        <input id="hasAdvancedLesion" type="checkbox"
+                                class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    </div>
+                    <div class="ml-3 text-base">
+                        <label for="hasAdvancedLesion" class="font-medium text-blue-800">Lesión AVANZADA</label>
+                        <p class="text-xs text-gray-500">Adenoma o lesión serrada &ge; 10 mm o displasia de alto grado/Tis.</p>
+                    </div>
+                </div>
+
+                <div class="relative flex items-start p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-center h-5">
+                        <input id="hasSessile20mm" type="checkbox"
+                                class="h-5 w-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                    </div>
+                    <div class="ml-3 text-base">
+                        <label for="hasSessile20mm" class="font-medium text-yellow-800">Lesión sésil/plana &ge; 20mm</label>
+                        <p class="text-xs text-gray-500">Específicamente lesiones no pediculadas de gran tamaño.</p>
+                    </div>
+                </div>
+
+                <div id="fragmentedResectionContainer" class="hidden pl-6 space-y-2 mt-2 pt-2 border-t border-dashed border-gray-300">
+                    <div class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="hasFragmentedResection" type="checkbox"
+                                    class="h-5 w-5 text-[var(--color-accent-red)] border-gray-300 rounded focus:ring-[var(--color-accent-red)]">
+                        </div>
+                        <div class="ml-3 text-base">
+                            <label for="hasFragmentedResection" class="font-bold text-[var(--color-accent-red)]">¿Resección fragmentada?</label>
+                            <p class="text-xs text-gray-500">Si la lesión (&ge; 20mm) se resecó en fragmentos (implica vigilancia muy estrecha).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative flex items-start pt-2 border-t border-gray-200">
+                    <div class="flex items-center h-5">
+                        <input id="isPDPCCR" type="checkbox"
+                                class="h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                    </div>
+                    <div class="ml-3 text-base">
+                        <label for="isPDPCCR" class="font-medium text-gray-800">¿Proviene del Programa de Cribado (PDPCCR)?</label>
+                        <p class="text-xs text-gray-500">Marcar si el paciente fue referido desde el programa poblacional.</p>
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <button id="calculateButton"
+                class="w-full text-white font-bold py-3 px-4 rounded-xl focus:outline-none focus-ring mt-4">
+                Calcular Próxima Colonoscopia
+            </button>
+            
+            <button id="clearButton"
+                    class="w-full bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl shadow-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Limpiar Formulario
+            </button>
+            
+            <div class="flex space-x-3 mt-3">
+                
+                <button id="backToMenuButton"
+                        class="w-1/3 text-sm font-semibold py-3 px-1 rounded-xl shadow-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-150">
+                    <a href="index.html" class="block w-full text-center no-underline text-gray-700">
+                        ← Menú
+                    </a>
+                </button>
+
+                <button id="openAboutModal"
+                        class="w-1/3 text-sm font-semibold py-3 px-1 rounded-xl shadow-md bg-indigo-200 text-indigo-800 hover:bg-indigo-300 transition duration-150">
+                    Acerca de
+                </button>
+
+                <button id="goToRiesgoCCRButton"
+                        class="w-1/3 text-sm font-semibold py-3 px-1 rounded-xl shadow-md bg-sky-200 text-sky-800 hover:bg-sky-300 transition duration-150">
+                    <a href="Riesgo_CCR.html" class="block w-full text-center no-underline text-sky-800">
+                        Riesgo CCR →
+                    </a>
+                </button>
+            </div>
+        </div>
+
+        <div id="resultContainer" class="hidden mt-6">
+            <div id="resultBox" class="rounded-xl p-6 border-l-8 shadow-xl">
+                <h3 id="resultTitle" class="font-extrabold text-2xl mb-2"></h3>
+                <p id="resultText" class="text-4xl font-bold"></p>
+                <p id="resultCategory" class="text-base font-semibold opacity-95 mt-2"></p>
+                <p id="resultDisclaimer" class="text-xs text-gray-700 mt-4 pt-3 border-t border-gray-300/60"></p>
+            </div>
+        </div>
+
+        <div class="text-center mt-6">
+            <p class="text-xs text-gray-400">
+                Esta herramienta es una guía basada en los algoritmos de la ESGE 2020.
+                No sustituye el juicio clínico profesional.<br>
+                Versión 2.0. © Paco Casado. Granada 2025
+            </p>
+        </div>
+
+    </div>
+
+    <div id="spsModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-xl">Criterios de Síndrome de Poliposis Serrada (SPS)</h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Se cumple SPS si se presenta <strong>al menos uno</strong> de los siguientes criterios (OMS 2019):
+            </p>
+            <ul>
+                <li>
+                    <strong>Criterio I:</strong>
+                    Al menos <strong>cinco pólipos serrados</strong> ubicados en el colon proximal (antes del recto), donde <strong>todos</strong> deben ser de al menos 5mm de tamaño y al menos <strong>dos</strong> de ellos deben medir 10mm o más.
+                </li>
+                <li>
+                    <strong>Criterio II:</strong>
+                    Más de <strong>20 pólipos serrados de cualquier tamaño</strong> distribuidos por todo el colon, pero con al menos <strong>cinco</strong> de ellos ubicados en el colon proximal.
+                </li>
+            </ul>
+            <button id="closeSPSModal" class="mt-4 w-full bg-[var(--color-secondary-teal)] text-white font-semibold py-2 rounded-lg hover:bg-[#006b5f] transition">
+                Cerrar
+            </button>
+        </div>
+    </div>
+    <div id="errorModal" class="modal-overlay hidden">
+        <div class="error-modal-content">
+            <h3 class="text-xl font-bold text-red-700 mb-3 flex items-center justify-center">
+                <span class="mr-2 text-2xl">⛔</span> Error de Validación
+            </h3>
+            <p id="errorModalText" class="text-base text-gray-800 mb-5 font-medium"></p>
+            <button id="closeErrorModal" class="w-full bg-[var(--color-accent-red)] text-white font-semibold py-2 rounded-lg hover:bg-[#b03032] transition">
+                Aceptar y Corregir
+            </button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- REFERENCIAS DE IMÁGENES PARA ZOOM (NUEVO) ---
+            const bostonImage = document.getElementById('bostonImage');
+            const parisImage = document.getElementById('parisImage');
+            const jnetImage = document.getElementById('jnetImage');
+            
+            // --- REFERENCIAS DE LAS MODALES DE CALIDAD (NUEVO) ---
+            
+            // Modal Principal de Ayuda
+            const qualityHelpModal = document.getElementById('qualityHelpModal');
+            const openQualityHelpModalButton = document.getElementById('openQualityHelpModal');
+            const closeQualityHelpModalButton = document.getElementById('closeQualityHelpModal');
+            
+            // Modales de Imagen
+            const bostonModal = document.getElementById('bostonModal');
+            const openBostonModalButton = document.getElementById('openBostonModal');
+            const closeBostonModalButton = document.getElementById('closeBostonModal');
+            
+            const parisModal = document.getElementById('parisModal');
+            const openParisModalButton = document.getElementById('openParisModal');
+            const closeParisModalButton = document.getElementById('closeParisModal');
+            
+            const jnetModal = document.getElementById('jnetModal');
+            const openJNETModalButton = document.getElementById('openJNETModal');
+            const closeJNETModalButton = document.getElementById('closeJNETModal');
+            
+            // --- REFERENCIAS DE LA MODAL ACERCA DE ---
+            const aboutModal = document.getElementById('aboutModal');
+            const openAboutModalButton = document.getElementById('openAboutModal');
+            const closeAboutModalButton = document.getElementById('closeAboutModal');
+            const doctorCalcVideo = document.getElementById('doctorCalcVideo');
+
+            // Referencias para la Modal de Ayuda SPS
+            const spsModal = document.getElementById('spsModal');
+            const openSPSModal = document.getElementById('openSPSModal');
+            const closeSPSModal = document.getElementById('closeSPSModal');
+            
+            // Referencias para la Modal de Error
+            const errorModal = document.getElementById('errorModal');
+            const errorModalText = document.getElementById('errorModalText');
+            const closeErrorModalButton = document.getElementById('closeErrorModal');
+            let focusedElementOnError = null;
+                       
+            // Lista de todas las modales que quieres poder cerrar con el botón de retroceso
+            const allModals = [
+                aboutModal,
+                qualityHelpModal,
+                bostonModal,
+                parisModal,
+                jnetModal,
+                spsModal,
+                errorModal
+            ];
+
+            // --- BLOQUE DE DEPURACIÓN DE REFERENCIAS ---
+            allModals.forEach((modal, index) => {
+                if (!modal) {
+                    // Encontrar el nombre de la variable que es null. Esto es complejo.
+                    // Simplificamos: si el elemento es null, mostramos la lista completa
+                    console.error('ERROR CRÍTICO: Una modal en allModals es NULL. Revisar IDs en el HTML.');
+                    // Opcional: imprimir el array para ver cuál falta
+                    // console.log('allModals Array:', allModals.map(m => m ? m.id : 'NULL')); 
+                }
+            });
+
+            
+            // --- FUNCIONES DE CONTROL DE MODALES ---
+            
+            const openModal = (modalElement) => {
+                modalElement.classList.remove('hidden');
+                modalElement.style.display = 'flex';
+            };
+
+            const closeModal = (modalElement) => {
+                if (!modalElement) return;
+
+                // LIMPIEZA DE SEGURIDAD:
+                // Al cerrar cualquier modal, nos aseguramos de quitar zooms por si acaso
+                bostonImage.classList.remove('zoomed');
+                parisImage.classList.remove('zoomed');
+                jnetImage.classList.remove('zoomed');
+
+                // Cierre visual
+                modalElement.classList.add('hidden');
+                modalElement.style.display = 'none';
+            };
+
+            // --- FUNCIÓN DE ZOOM (NUEVO) ---
+            const setupZoom = (imgElement) => {
+                imgElement.addEventListener('click', () => {
+                    // Alterna la clase 'zoomed' al tocar
+                    imgElement.classList.toggle('zoomed');
+                });
+            };
+            
+            // Aplicar la función de zoom para activar/desactivar al pulsar la imagen
+            setupZoom(bostonImage);
+            setupZoom(parisImage);
+            setupZoom(jnetImage);
+            
+            // --- EVENT LISTENERS DE LA MODAL PRINCIPAL DE AYUDA ---
+            
+            // Abrir Ayuda de Calidad (desde el botón ?)
+            openQualityHelpModalButton.addEventListener('click', () => {
+                openModal(qualityHelpModal);
+            });
+
+            // Cerrar Ayuda de Calidad (desde la X)
+            closeQualityHelpModalButton.addEventListener('click', () => {
+                closeModal(qualityHelpModal);
+            });
+            
+            // Cerrar Ayuda de Calidad haciendo clic fuera (en el overlay)
+            qualityHelpModal.addEventListener('click', (e) => {
+                if (e.target === qualityHelpModal) {
+                    closeModal(qualityHelpModal);
+                }
+            });
+
+           // 1. Verificar si Capacitor está disponible (solo funciona en APK)
+           // ===================================================
+           // === INTEGRACIÓN DEL BOTÓN DE RETROCESO (REFORZADA) ===
+           // ===================================================
+
+           // Escuchamos el evento que enviamos desde la MainActivity.java
+         window.addEventListener('hardwareBackPress', () => {
+             console.log('--- EVENTO NATIVO RECIBIDO EN JS ---');
+
+             // --- NIVEL 1: ZOOM ---
+             const zoomedImage = [bostonImage, parisImage, jnetImage].find(img => img && img.classList.contains('zoomed'));
+             if (zoomedImage) {
+                 console.log('DEBUG: Detectado Nivel 1 (Zoom)');
+                 zoomedImage.classList.remove('zoomed');
+                 return;
+             }
+
+             // --- NIVEL 2: MODALES DE IMAGEN ---
+             const imageModals = [bostonModal, parisModal, jnetModal];
+             // Una modal está "realmente" abierta si NO tiene 'hidden' Y su display no es 'none'
+             const openImageModal = imageModals.find(modal => {
+                 return modal && !modal.classList.contains('hidden') && window.getComputedStyle(modal).display !== 'none';
+             });
+    
+             if (openImageModal) {
+                 console.log('DEBUG: Detectado Nivel 2 (Imagen):', openImageModal.id);
+                 closeModal(openImageModal);
+                 return;
+             }
+
+             // --- NIVEL 3: MODALES PRINCIPALES ---
+             const mainModals = [qualityHelpModal, aboutModal, errorModal, spsModal];
+             const openMainModal = mainModals.find(modal => {
+                 return modal && !modal.classList.contains('hidden') && window.getComputedStyle(modal).display !== 'none';
+             });
+
+             if (openMainModal) {
+                 console.log('DEBUG: Detectado Nivel 3 (Principal):', openMainModal.id);
+                 if (openMainModal === aboutModal) {
+                     closeAboutModal();
+                 } else if (openMainModal === errorModal) {
+                     closeErrorModal();
+                 } else {
+                     closeModal(openMainModal);
+                 }
+                 return; 
+             }
+
+             // --- NIVEL 4: NAVEGACIÓN O SALIDA ---
+             console.log('DEBUG: Llegamos al Nivel 4 (Navegación/Salida)');
+    
+             // 1. Si estamos en Calculadora o Riesgo, el botón atrás debería llevarnos al menú (index.html)
+             // Comprobamos si el nombre del archivo actual NO es index.html
+             const isMenu = window.location.pathname.endsWith('index.html') || window.location.pathname === '/';
+
+             if (!isMenu) {
+                 console.log('LOG: Volviendo al menú principal (index.html)');
+                 window.location.href = 'index.html';
+             } else {
+                 // 2. Si YA estamos en index.html, entonces sí cerramos la aplicación
+                 console.log('LOG: Ya estamos en el menú. Saliendo de la app.');
+                 if (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.App) {
+                     Capacitor.Plugins.App.exitApp();
+                 }
+             }
+         });
+
+            // --- EVENT LISTENERS DE LAS MODALES DE IMAGEN ---
+            
+            // Boston
+            openBostonModalButton.addEventListener('click', () => openModal(bostonModal));
+            closeBostonModalButton.addEventListener('click', () => closeModal(bostonModal));
+            bostonModal.addEventListener('click', (e) => {
+                if (e.target === bostonModal) closeModal(bostonModal);
+            });
+
+            // París
+            openParisModalButton.addEventListener('click', () => openModal(parisModal));
+            closeParisModalButton.addEventListener('click', () => closeModal(parisModal));
+            parisModal.addEventListener('click', (e) => {
+                if (e.target === parisModal) closeModal(parisModal);
+            });
+
+            // JNET
+            openJNETModalButton.addEventListener('click', () => openModal(jnetModal));
+            closeJNETModalButton.addEventListener('click', () => closeModal(jnetModal));
+            jnetModal.addEventListener('click', (e) => {
+                if (e.target === jnetModal) closeModal(jnetModal);
+            });
+            
+             // --- EVENT LISTENERS DE LAS MODALES DE IMAGEN (MODIFICADO) ---
+            
+            // Boston (Modificar el evento closeBostonModalButton)
+            closeBostonModalButton.addEventListener('click', () => {
+                closeModal(bostonModal);
+                bostonImage.classList.remove('zoomed'); // <<-- AÑADIDO
+            });
+            // Cerrar Boston haciendo clic fuera (en el overlay)
+            bostonModal.addEventListener('click', (e) => {
+                if (e.target === bostonModal) {
+                    closeModal(bostonModal);
+                    bostonImage.classList.remove('zoomed'); // <<-- AÑADIDO
+                }
+            });
+
+            // París (Modificar el evento closeParisModalButton)
+            closeParisModalButton.addEventListener('click', () => {
+                closeModal(parisModal);
+                parisImage.classList.remove('zoomed'); // <<-- AÑADIDO
+            });
+            // Cerrar París haciendo clic fuera (en el overlay)
+            parisModal.addEventListener('click', (e) => {
+                if (e.target === parisModal) {
+                    closeModal(parisModal);
+                    parisImage.classList.remove('zoomed'); // <<-- AÑADIDO
+                }
+            });
+
+            // JNET (Modificar el evento closeJNETModalButton)
+            closeJNETModalButton.addEventListener('click', () => {
+                closeModal(jnetModal);
+                jnetImage.classList.remove('zoomed'); // <<-- AÑADIDO
+            });
+            // Cerrar JNET haciendo clic fuera (en el overlay)
+            jnetModal.addEventListener('click', (e) => {
+                if (e.target === jnetModal) {
+                    closeModal(jnetModal);
+                    jnetImage.classList.remove('zoomed'); // <<-- AÑADIDO
+                }
+            });
+            
+            // --- EVENT LISTENERS DE ACERCA DE ---
+            
+            // 1. Definimos la función de cerrar UNA SOLA VEZ
+            const closeAboutModal = () => {
+                closeModal(aboutModal); // Tu función genérica
+                doctorCalcVideo.pause();
+                doctorCalcVideo.style.opacity = "0";
+                doctorCalcVideo.currentTime = 0; // Rebobina al cerrar para dejarlo listo
+            };
+
+            // 2. Event Listener para abrir
+            openAboutModalButton.addEventListener('click', () => {
+                // Reset profundo antes de mostrar para evitar el "flash" del final
+                doctorCalcVideo.style.opacity = "0";
+                doctorCalcVideo.pause();
+                doctorCalcVideo.currentTime = 0; 
+                doctorCalcVideo.load(); 
+                aboutModal.style.display = "flex";
+                aboutModal.setAttribute("aria-hidden", "false");
+                openModal(aboutModal); 
+                doctorCalcVideo.onplaying = () => {
+                    doctorCalcVideo.style.opacity = "1";
+                };
+                doctorCalcVideo.play().catch(error => {
+                
+                    console.log('Error al intentar el autoplay: ', error);
+                }); 
+            });
+
+            // 3. Event Listeners para cerrar (usando la función de arriba)
+            closeAboutModalButton.addEventListener('click', closeAboutModal);
+
+            aboutModal.addEventListener('click', (e) => {
+                if (e.target === aboutModal) {
+                    closeAboutModal();
+                }
+            });
+            
+            // Referencias a los elementos del formulario
+            const totalPolyps = document.getElementById('totalPolyps');
+            const isPT1 = document.getElementById('isPT1');
+            const serratedRiskContainer = document.getElementById('serratedRiskContainer');
+            
+            // Referencias para los criterios SPS
+            const numProximalSerrated5mm = document.getElementById('numProximalSerrated5mm');
+            const numProximalSerrated10mm = document.getElementById('numProximalSerrated10mm');
+            const hasMoreThan20SerratedTotal = document.getElementById('hasMoreThan20SerratedTotal');
+            const criterioIITitle = document.getElementById('criterioIITitle'); // NUEVA REFERENCIA
+            const criterioIITotalContainer = document.getElementById('criterioIITotalContainer'); 
+            
+            const hasAdvancedLesion = document.getElementById('hasAdvancedLesion');
+            const hasSessile20mm = document.getElementById('hasSessile20mm');
+            const fragmentedResectionContainer = document.getElementById('fragmentedResectionContainer');
+            const hasFragmentedResection = document.getElementById('hasFragmentedResection');
+            const isPDPCCR = document.getElementById('isPDPCCR');
+            
+            // Botones y Resultados
+            const calculateButton = document.getElementById('calculateButton');
+            const clearButton = document.getElementById('clearButton'); 
+            const resultContainer = document.getElementById('resultContainer');
+            const resultBox = document.getElementById('resultBox');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultText = document.getElementById('resultText');
+            const resultCategory = document.getElementById('resultCategory');
+            const resultDisclaimer = document.getElementById('resultDisclaimer');
+             
+            // --- FUNCIÓN PARA MOSTRAR LA MODAL DE ERROR (CORREGIDO) ---
+            const showErrorModal = (message, elementToFocus) => {
+                errorModalText.textContent = message;
+                errorModal.classList.remove('hidden');
+    
+                // AÑADIDO: Establecer display para que sea detectable por Capacitor
+                errorModal.style.display = 'flex'; // O el que uses para mostrarla (flex/block)
+    
+                focusedElementOnError = elementToFocus; 
+                closeErrorModalButton.focus();
+            };
+
+            // --- LÓGICA PARA CERRAR LA MODAL DE ERROR (¡USANDO closeModal!) ---
+            const closeErrorModal = () => {
+    
+                // 1. Delegamos el cierre de la modal (clase y estilo) a la función genérica
+                closeModal(errorModal);
+    
+                // 2. Mantenemos la lógica específica de la modal de error
+               if (focusedElementOnError) {
+                   focusedElementOnError.focus();
+                   focusedElementOnError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                   focusedElementOnError = null; 
+               }
+            };
+            
+            closeErrorModalButton.addEventListener('click', closeErrorModal);
+            errorModal.addEventListener('click', (e) => {
+                if (e.target === errorModal) {
+                    closeErrorModal();
+                }
+            });
+
+
+            // --- LÓGICA DE VISIBILIDAD DE CONTENEDORES ---
+            
+            const evaluateSerratedVisibility = () => {
+                const numPolyps = parseInt(totalPolyps.value, 10);
+
+                // 1. Mostrar contenedor principal SPS si hay 5 o más pólipos en total.
+                if (numPolyps >= 5) {
+                    serratedRiskContainer.classList.remove('hidden');
+                } else {
+                     serratedRiskContainer.classList.add('hidden');
+                     // Resetear los campos serrados al ocultar
+                     numProximalSerrated5mm.value = 0;
+                     numProximalSerrated10mm.value = 0;
+                     hasMoreThan20SerratedTotal.checked = false;
+                     criterioIITitle.classList.add('hidden'); // Ocultar título si <= 4
+                     criterioIITotalContainer.classList.add('hidden');
+                }
+
+                // 2. Mostrar Criterio II (más de 20 pólipos totales) solo si numPolyps > 20.
+                if (numPolyps > 20) { // CAMBIO DE LÓGICA AQUÍ
+                    criterioIITitle.classList.remove('hidden'); 
+                    criterioIITotalContainer.classList.remove('hidden');
+                } else {
+                    criterioIITitle.classList.add('hidden'); 
+                    criterioIITotalContainer.classList.add('hidden');
+                    hasMoreThan20SerratedTotal.checked = false;
+                }
+            };
+
+            const updateCheckboxState = () => {
+                const num = parseInt(totalPolyps.value, 10);
+                
+                const polypsRelatedElements = [
+                    isPT1, hasAdvancedLesion, hasSessile20mm, hasFragmentedResection, 
+                    numProximalSerrated5mm, numProximalSerrated10mm, hasMoreThan20SerratedTotal
+                ];
+                
+                if (num === 0) {
+                    polypsRelatedElements.forEach(element => {
+                        if (element.type === 'checkbox') {
+                            element.checked = false;
+                        } else if (element.type === 'number') {
+                            element.value = 0;
+                        }
+                        element.disabled = true;
+                    });
+                    
+                    serratedRiskContainer.classList.add('hidden');
+                    fragmentedResectionContainer.classList.add('hidden');
+                    criterioIITitle.classList.add('hidden'); // Asegurar oculto
+                    criterioIITotalContainer.classList.add('hidden'); 
+
+                    isPDPCCR.disabled = false;
+                } else {
+                    polypsRelatedElements.forEach(element => {
+                        element.disabled = false;
+                    });
+                    isPDPCCR.disabled = false; 
+
+                    if (hasSessile20mm.checked) {
+                        fragmentedResectionContainer.classList.remove('hidden');
+                    } else {
+                        fragmentedResectionContainer.classList.add('hidden');
+                    }
+                    evaluateSerratedVisibility();
+                }
+            };
+
+
+            // --- FUNCIÓN PARA LIMPIAR EL FORMULARIO ---
+            const clearForm = () => {
+                totalPolyps.value = 0;
+                numProximalSerrated5mm.value = 0;
+                numProximalSerrated10mm.value = 0;
+
+                isPT1.checked = false;
+                hasAdvancedLesion.checked = false;
+                hasSessile20mm.checked = false;
+                hasFragmentedResection.checked = false;
+                isPDPCCR.checked = false;
+                hasMoreThan20SerratedTotal.checked = false;
+                
+                fragmentedResectionContainer.classList.add('hidden');
+                serratedRiskContainer.classList.add('hidden');
+                criterioIITitle.classList.add('hidden'); // Asegurar oculto
+                criterioIITotalContainer.classList.add('hidden'); 
+                resultContainer.classList.add('hidden');
+                errorModal.classList.add('hidden'); 
+
+                // Importante: Al limpiar, también removemos la clase de animación si estaba presente
+                resultContainer.classList.remove('animate-flash-twice');
+                
+                updateCheckboxState();
+            };
+            
+            // --- LÓGICA DE LA VENTANA MODAL SPS (CORREGIDO) ---
+
+            // Abrir SPS (utiliza openModal, que establece style.display = 'flex')
+            openSPSModal.addEventListener('click', () => {
+                openModal(spsModal);
+            });
+
+            // Cerrar SPS (utiliza closeModal, que establece style.display = 'none')
+            closeSPSModal.addEventListener('click', () => {
+                 closeModal(spsModal);
+            });
+
+            // Cerrar SPS haciendo clic fuera (utiliza closeModal)
+            spsModal.addEventListener('click', (e) => {
+                if (e.target === spsModal) {
+                    closeModal(spsModal);
+                }
+            });
+
+            // --- Lógica de Interacción Condicional ---
+            totalPolyps.addEventListener('input', () => {
+                updateCheckboxState();
+                evaluateSerratedVisibility();
+            });
+            
+            numProximalSerrated5mm.addEventListener('input', updateCheckboxState);
+            numProximalSerrated10mm.addEventListener('input', updateCheckboxState);
+
+            hasSessile20mm.addEventListener('change', () => {
+                if (hasSessile20mm.checked && parseInt(totalPolyps.value, 10) > 0) { 
+                    fragmentedResectionContainer.classList.remove('hidden');
+                } else {
+                    fragmentedResectionContainer.classList.add('hidden');
+                    hasFragmentedResection.checked = false; 
+                }
+            });
+            
+            updateCheckboxState();
+
+            // --- Lógica de Cálculo y Limpieza ---
+            clearButton.addEventListener('click', clearForm); 
+
+            calculateButton.addEventListener('click', () => {
+                // 1. VIBRACIÓN INMEDIATA (Feedback táctil)
+                if (window.navigator && window.navigator.vibrate) {
+                    window.navigator.vibrate(50); 
+                }
+
+                // 2. Continuar con la lógica normal
+                resultContainer.classList.add('hidden');
+                errorModal.classList.add('hidden'); 
+                resultContainer.classList.remove('animate-flash-twice'); // Aseguramos que se reinicia
+                
+                const numPolyps = parseInt(totalPolyps.value, 10);
+                
+                const numProximal5mm = parseInt(numProximalSerrated5mm.value, 10);
+                const numProximal10mm = parseInt(numProximalSerrated10mm.value, 10);
+                const is20Total = hasMoreThan20SerratedTotal.checked;
+
+
+                // *** VALIDACIÓN 1: Formato y valores de número ***
+                if (isNaN(numPolyps) || numPolyps < 0 || isNaN(numProximal5mm) || numProximal5mm < 0 || isNaN(numProximal10mm) || numProximal10mm < 0) {
+                    showErrorModal('Por favor, introduzca un número válido de pólipos (de 0 en adelante) en todos los campos numéricos.', totalPolyps);
+                    return; 
+                }
+                
+                // *** VALIDACIÓN 2: Consistencia entre tamaños serrados proximales ***
+                if (numProximal10mm > numProximal5mm) {
+                    showErrorModal('Error de consistencia: El número de lesiones serradas de ≥10mm no puede ser mayor que el número de lesiones de ≥5mm (Criterio I).', numProximalSerrated10mm);
+                    return; 
+                }
+                
+                // *** VALIDACIÓN 3: Consistencia: Serrados proximales no pueden superar el Total de pólipos ***
+                if (numProximal5mm > numPolyps) {
+                    showErrorModal('Error de consistencia: El número de pólipos serrados proximales ≥5mm no puede ser mayor que el Total de pólipos extirpados.', numProximalSerrated5mm);
+                    return; 
+                }
+
+
+                // *** VALIDACIÓN 4: Inconsistencia Cero Pólipos ***
+                if (numPolyps === 0) {
+                    const isAnyFindingChecked = isPT1.checked || hasAdvancedLesion.checked || hasSessile20mm.checked || hasFragmentedResection.checked || (numProximal5mm > 0) || is20Total;
+                    
+                    if (isAnyFindingChecked) {
+                        showErrorModal('Si el Número total de adenomas + lesiones serradas es 0, no puede haber lesiones avanzadas, pT1 o criterios de SPS marcados. Corrija el número de pólipos o desmarque las casillas de hallazgos.', totalPolyps);
+                        return; 
+                    }
+                }
+                
+                // Obtener el resto de valores
+                const isAdvanced = hasAdvancedLesion.checked;
+                const isSessile20 = hasSessile20mm.checked;
+                const isFragmented = hasFragmentedResection.checked;
+                const isFromPDPCCR = isPDPCCR.checked;
+                const isPT1lesion = isPT1.checked;
+                
+                // --- CRITERIOS DE SÍNDROME DE POLIPOSIS SERRADA (SPS) - OMS 2019/2020 ---
+                const meetsSPS_CriterioI = (numProximal5mm >= 5) && (numProximal10mm >= 2);
+                const meetsSPS_CriterioII = is20Total; 
+                const isSerratedHighRisk = meetsSPS_CriterioI || meetsSPS_CriterioII;
+
+                // Variables para el resultado
+                let recommendation = '';
+                let category = '';
+                let boxClasses = 'rounded-xl p-6 border-l-8 shadow-xl '; // Base para el resultado
+                let titleColor = '';
+                let textColor = '';
+                let categoryColor = '';
+                let disclaimerText = "";
+
+                // --- APLICACIÓN DE LA LÓGICA DE PRIORIDAD (SCD 2020) ---
+                
+                // 1. MUY ALTO RIESGO / CAR (Remisión Prioritaria)
+                if (numPolyps >= 20 || isPT1lesion || isSerratedHighRisk) {
+                    recommendation = 'Remitir a Consulta de Cáncer Colorrectal de Alto Riesgo (CAR)';
+                    
+                    if (numPolyps >= 20) {
+                        category = 'SÍNDROME DE POLIPOSIS/MUY ALTO RIESGO';
+                        disclaimerText = "ATENCIÓN: Se requiere valoración genética para descartar un síndrome de poliposis.";
+                    } else if (isPT1lesion) {
+                        category = 'CÁNCER INVASIVO (PT1)';
+                        disclaimerText = "ATENCIÓN: Cáncer T1 resecado por polipectomía/mucosectomía. Remitir para comité oncológico (criterios de alto riesgo, cirugía, o vigilancia estrecha).";
+                    } else { // isSerratedHighRisk
+                        category = 'SÍNDROME DE POLIPOSIS SERRADA (SPS)';
+                        disclaimerText = "ATENCIÓN: Criterios de SPS cumplidos (OMS 2019/2020). Se requiere valoración específica, que puede implicar vigilancia muy estrecha (6-12 meses) o colonoscopia total inmediata de calidad.";
+                    }
+
+                    boxClasses += 'bg-purple-100 border-purple-700'; 
+                    titleColor = 'text-purple-900';
+                    textColor = 'text-purple-800';
+                    categoryColor = 'text-purple-700';
+
+                // 2. VIGILANCIA A CORTO PLAZO (Fragmentación)
+                } else if (isSessile20 && isFragmented) {
+                    recommendation = 'Colonoscopia en 4-6 meses';
+                    category = 'VIGILANCIA A CORTO PLAZO';
+                    boxClasses += 'bg-red-100 border-red-700';
+                    titleColor = 'text-red-900';
+                    textColor = 'text-red-800';
+                    categoryColor = 'text-red-700';
+                    
+                    disclaimerText = "ATENCIÓN: La colonoscopia de control a los 4-6 meses definirá el seguimiento. Si se comprueba resección completa, se continúa con Vigilancia Intensiva (colonoscopia al año). Si queda residuo de lesión, se debe remitir a CAR (Consulta de Alto Riesgo).";
+
+                // 3. VIGILANCIA INTENSIVA (Lesión sésil 20mm o >= 10 pólipos)
+                } else if (isSessile20 || numPolyps >= 10) {
+                    recommendation = 'Colonoscopia en 1 año';
+                    category = 'VIGILANCIA INTENSIVA';
+                    boxClasses += 'bg-red-100 border-red-500';
+                    titleColor = 'text-red-900';
+                    textColor = 'text-red-800';
+                    categoryColor = 'text-red-700';
+                    disclaimerText = "Nota: Tras esta colonoscopia, se actuará según hallazgos. Si no hay lesiones, la próxima colonoscopia será a los 5 años. Valorar suspender vigilancia a partir de los 80 años (según calidad de vida y comorbilidades).";
+
+                // 4. VIGILANCIA ESTÁNDAR (Alto Riesgo Adenomatoso: Lesión avanzada o 5-9 pólipos)
+                } else if (isAdvanced || (numPolyps >= 5 && numPolyps <= 9)) {
+                    recommendation = 'Colonoscopia en 3 años';
+                    category = 'VIGILANCIA ESTÁNDAR';
+                    boxClasses += 'bg-yellow-100 border-yellow-500';
+                    titleColor = 'text-yellow-900';
+                    textColor = 'text-yellow-800';
+                    categoryColor = 'text-yellow-700';
+                    disclaimerText = "Nota: Tras esta colonoscopia, se actuará según hallazgos. Si no hay lesiones, la próxima colonoscopia será a los 5 años. Valorar suspender vigilancia a partir de los 80 años (según calidad de vida y comorbilidades).";
+                    
+                // 5. BAJO RIESGO (0 a 4 lesiones NO avanzadas, NO PT1, NO Alto Riesgo Serrado)
+                } else {
+                    
+                    if (numPolyps === 0 && isFromPDPCCR) { 
+                        recommendation = 'Regreso al PDPCCR en 10 años (TSOHi)';
+                        category = 'BAJO RIESGO - CRIBADO (SIN PÓLIPOS)';
+                        disclaimerText = "Indicación específica para pacientes de cribado sin hallazgos patológicos (pólipos extirpados = 0). En caso de que el paciente salga del programa de cribado por edad, se puede optar por colonoscopia a los 10 años.";
+                    } else if (numPolyps === 0 && !isFromPDPCCR) { 
+                        recommendation = 'La necesidad de nueva colonoscopia dependerá de la edad y el riesgo personal o familiar.';
+                        category = 'VIGILANCIA BASADA EN EL RIESGO DE REFERENCIA';
+                        boxClasses += 'bg-blue-100 border-blue-500';
+                        titleColor = 'text-blue-900';
+                        textColor = 'text-blue-800';
+                        categoryColor = 'text-blue-700';
+                        disclaimerText = "El paciente no tiene lesiones en la colonoscopia. El seguimiento se basa en el riesgo de CCR de la población general (edad y riesgo personal/familiar), saliendo del protocolo de vigilancia endoscópica. Nota: Si el paciente proviene de cribado por riesgo familiar de CCR, se indicará colonoscopia en 5 años.";
+                    } else if (isFromPDPCCR) { // 1 a 4 pólipos no avanzados desde cribado
+                        recommendation = 'Regreso al PDPCCR en 5 años (TSOHi)';
+                        category = 'BAJO RIESGO - CRIBADO (1-4 PÓLIPOS)';
+                        disclaimerText = "Nota: El paciente sale del protocolo de vigilancia endoscópica y vuelve al programa de cribado. En caso de que el paciente salga del programa de cribado por edad, se puede optar por colonoscopia a los 7-10 años, a criterio del facultativo.";
+                    } else { // 1 a 4 pólipos no avanzados fuera de cribado
+                        recommendation = 'Colonoscopia en 7 a 10 años, según criterio facultativo';
+                        category = 'BAJO RIESGO (1-4 PÓLIPOS, Fuera de Cribado)';
+                        disclaimerText = "Nota: Si el paciente proviene de cribado por riesgo familiar de CCR, se indicará colonoscopia en 5 años.";
+                    }
+                    
+                    if (!boxClasses.includes('bg-blue-100')) {
+                        boxClasses += 'bg-green-100 border-green-500';
+                        titleColor = 'text-green-900';
+                        textColor = 'text-green-800';
+                        categoryColor = 'text-green-700';
+                    }
+                }
+
+                // Mostrar resultados
+                resultBox.className = boxClasses;
+                resultTitle.className = `font-extrabold text-2xl mb-2 ${titleColor}`;
+                resultText.className = `text-3xl font-bold ${textColor}`;
+                resultCategory.className = `text-base font-semibold opacity-95 mt-2 ${categoryColor}`;
+
+                resultTitle.textContent = 'Recomendación:';
+                resultText.textContent = recommendation;
+                resultCategory.textContent = `Categoría: ${category}`;
+                resultDisclaimer.textContent = disclaimerText;
+                
+                // --- CÓDIGO ACTUALIZADO: AÑADIR CLASE, HACER SCROLL, Y QUITAR CLASE TRAS TIMEOUT ---
+                
+                resultContainer.classList.remove('hidden');
+                
+                // 1. Añadir la clase de animación (animación de 1.5s, 2 repeticiones)
+                resultContainer.classList.add('animate-flash-twice');
+                resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // 2. Eliminar la clase después del tiempo de la animación
+                setTimeout(() => {
+                    resultContainer.classList.remove('animate-flash-twice');
+                }, 1500); 
+                // --- FIN CÓDIGO ACTUALIZADO ---
+            });
+        });
+    </script>
+    <div id="aboutModal" class="modal-overlay hidden">
+        <div class="modal-content modal-large">
+            
+            <button id="closeAboutModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <div class="mb-4">
+                <video id="doctorCalcVideo" width="100%" autoplay muted preload="metadata"> 
+                    <source src="DoctorCalc.mp4" type="video/mp4">
+                    Tu navegador no soporta la reproducción de video.
+                </video>
+            </div>
+
+            <div class="prose max-w-none text-sm text-gray-700">
+                <h3 class="text-lg font-semibold text-gray-800">Acerca de ColonCalc:</h3>
+                <div class="about-text">
+                    ColonCalc es una aplicación de la serie <strong>DoctorCalc ©</strong>, basada en las recomendaciones de las guías <em>"Post-polypectomy colonoscopy surveillance: European Society
+                    of Gastrointestinal Endoscopy (ESGE) Guideline – Update 2020"</em>, <em>"Endoscopic management of Lynch syndrome and of familial risk of
+                    colorectal cancer: European Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> y <em>"Endoscopic management of polyposis syndromes: European
+                    Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> de 2019, publicadas en la revista Endoscopy 2019-2020. Proporciona recomendaciones de seguimiento de forma rápida y precisa.<br>Versión 2.0. © Paco Casado. Granada 2025
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="qualityHelpModal" class="modal-overlay hidden">
+        <div class="modal-content modal-large">
+            
+            <button id="closeQualityHelpModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <h3 class="text-xl font-bold text-[var(--color-secondary-teal)] mb-4">Criterios de Calidad de la Colonoscopia</h3>
+
+            <div class="prose max-w-none text-sm text-gray-700 mb-6">
+                <p class="font-semibold text-gray-800">Una colonoscopia de calidad implica, como mínimo, lo siguiente:</p><br>
+                <ul>
+                    <li>Preparación adecuada (Escala de Boston ≥ 2 en todos los segmentos).</li>
+                    <li>Intubación cecal (exploración completa) visualizando ostium y válvula.</li>
+                    <li>Tiempo de retirada mínimo de 6 minutos (ideal 10 m).</li>
+                    <li>El informe tiene que reflejar todas las lesiones detectadas, adecuadamente catalogadas, localizadas y medidas.</li>
+                    <li>Resección completa de todas las lesiones, especificando el método utilizado.</li>
+                    <li>Las lesiones no pediculadas ≥ 20 mm deben ser tatuadas para localizar el sitio en las revisiones.</li>
+                    <li>Recuperación de ≥ 90% de los pólipos resecados > 5 mm.</li>
+                    <li>Todos los pólipos deprimidos (0-IIc) y los LST deben evaluarse con cromoendoscopia convencional o virtual.</li>
+                    <li>Utilizar la clasificación de París para todas las lesiones.</li>
+                    <li>Dar recomendaciones de seguimiento al alta tras polipectomía a ≥ 95% de los pacientes.</li><br>
+                </ul>
+                <p class="text-xs text-gray-800 mt-1"><i><strong>Fuentes:</strong> Performance measures for lower gastrointestinal endoscopy:
+                          a European Society of Gastrointestinal Endoscopy (ESGE) Quality Improvement Initiative. Endoscopy 2017<br>
+                          WEO Expert Working Group of Surveillance after colonic neoplasm. Colonoscopy quality requisites for selecting
+                           surveillance intervals: A World Endoscopy Organization Delphi Recommendation. Dig Endosc 2018</i></p>
+                </div>
+            
+            <div class="flex justify-around space-x-3">
+                <button id="openBostonModal" class="w-1/3 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
+                    Boston
+                </button>
+                <button id="openParisModal" class="w-1/3 bg-purple-600 text-white font-semibold py-2 rounded-lg hover:bg-purple-700 transition">
+                    París
+                </button>
+                <button id="openJNETModal" class="w-1/3 bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition">
+                    JNET
+                </button>
+            </div>
+        </div>
+    </div>
+ 
+    <div id="bostonModal" class="modal-overlay hidden">
+        <div class="image-modal-content">
+            <button id="closeBostonModal" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            </button>
+            <h4 class="text-center font-bold text-lg mb-2">Escala de Preparación de Boston</h4>
+            <div class="scroll-container-image">
+                <img id="bostonImage" src="Boston.jpg" alt="Imagen de la Escala de Boston" class="mx-auto zoomable">
+            </div>
+        </div>
+    </div>
+
+    <div id="parisModal" class="modal-overlay hidden">
+        <div class="image-modal-content">
+            <button id="closeParisModal" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            </button>
+            <h4 class="text-center font-bold text-lg mb-2">Clasificación de Morfología de París</h4>
+            <div class="scroll-container-image">
+                <img id="parisImage" src="Paris.jpg" alt="Imagen de la Clasificación de París" class="mx-auto zoomable">
+            </div>
+        </div>
+    </div>
+
+    <div id="jnetModal" class="modal-overlay hidden">
+        <div class="image-modal-content">
+            <button id="closeJNETModal" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            </button>
+            <h4 class="text-center font-bold text-lg mb-2">Clasificación JNET (Para Neoplasias Colorrectales)</h4>
+            <div class="scroll-container-image">
+                <img id="jnetImage" src="JNET.jpg" alt="Imagen de la Clasificación JNET" class="mx-auto zoomable">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calcula el riesgo de cáncer colorrectal familiar y define intervalos de vigilancia según las guías ESGE 2019/2020.">
+    <meta name="theme-color" content="#1f7832">
+    <title>ColonCalc - Aplicación</title>
+
+    <!-- Fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <style>
+        /* ======== Estilos base ======== */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f9fafb;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            color: #222;
+        }
+
+        main.container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 380px; 
+            padding: 30px 15px; 
+            box-sizing: border-box;
+        }
+
+        /* ======== Logotipo ======== */
+        .logo-image {
+            width: 75%;
+            max-width: 250px;
+            height: auto;
+            margin-top: 30px;
+        }
+
+        /* ======== Texto descriptivo ======== */
+        .description-text {
+            font-size: 1em;
+            line-height: 1.5;
+            color: #333;
+            margin: 0;
+            padding: 0 10px;
+            margin-bottom: 25px;
+        }
+
+        /* ======== Botones ======== */
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            margin-bottom: 0px;
+        }
+
+        .calculator-button {
+            display: block;
+            width: 80%;
+            max-width: 280px;
+            padding: 12px;
+            background-color: #1f7832;
+            color: #fff;
+            text-decoration: none;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.15s ease;
+        }
+
+        .calculator-button:hover {
+            background-color: #1a5e27;
+        }
+
+        /* ======== Responsividad ======== */
+         @media (min-width: 600px) {
+            main.container {
+                height: 90vh; 
+                max-width: 500px; 
+                justify-content: space-evenly; 
+            }
+            .logo-image {
+                /* AJUSTE FINAL DE TAMAÑO: Logo más pequeño en PC */
+                width: 50%; 
+                max-width: 180px; 
+                margin-bottom: 0; 
+            }
+            .description-text {
+                margin-bottom: 0;
+            }
+            .calculator-button {
+                font-size: 1em; /* Ligeramente más pequeños en PC */
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <img src="Coloncalc.png" alt="Logotipo de ColonCalc" class="logo-image">
+
+        <p class="description-text">
+            <strong>Aplicación para calcular el riesgo de cáncer colorrectal familiar y los intervalos de vigilancia según lesiones en la colonoscopia.</strong><br>
+            Basada en las guías de la <em>ESGE 2019/2020</em>.
+        </p>
+
+        <div class="buttons-container">
+            <a href="Calculadora.html" class="calculator-button" role="button">Iniciar Calculadora</a>
+            <a href="Riesgo_CCR.html" class="calculator-button" role="button">Calcular Riesgo Familiar</a>
+        </div>
+    </main>
+</body>
+</html>

@@ -18,6 +18,8 @@ workflows:
           npm run build
       - name: Capacitor Sync
         script: | 
+          # Esto le da permiso de ejecución a los archivos binarios de Capacitor
+          chmod +x node_modules/.bin/cap
           npx cap sync ios
       - name: Build iOS (.ipa)
         script: | 

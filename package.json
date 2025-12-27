@@ -1,4 +1,12 @@
 {
+  "name": "coloncalc",
+  "version": "1.0.0",
+  "description": "Calculadora Médica",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Build skip: using existing www folder'",
+    "sync": "npx cap sync"
+  },
   "dependencies": {
     "@capacitor/android": "^7.4.4",
     "@capacitor/cli": "^8.0.0",

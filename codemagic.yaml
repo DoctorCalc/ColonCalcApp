@@ -18,12 +18,15 @@ workflows:
           npm run build
       - name: Capacitor Sync
         script: | 
-          # Esto le da permiso de ejecución a los archivos binarios de Capacitor
           chmod +x node_modules/.bin/cap
+          # Esto añade la plataforma y genera el .xcworkspace si falta
+          npx cap add ios || true
           npx cap sync ios
       - name: Build iOS (.ipa)
         script: | 
-          xcode-project build-ipa --workspace $XCODE_WORKSPACE --scheme $XCODE_SCHEME
+          # Buscamos el workspace que se acaba de generar
+          XCODE_WS=$(find ios -name "*.xcworkspace" | head -n 1)
+          xcode-project build-ipa --workspace "$XCODE_WS" --scheme "App"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:

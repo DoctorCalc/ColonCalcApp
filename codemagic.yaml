@@ -24,9 +24,7 @@ workflows:
           npx cap sync ios
       - name: Build iOS (.ipa)
         script: | 
-          # Buscamos el workspace que se acaba de generar
-          XCODE_WS=$(find ios -name "*.xcworkspace" | head -n 1)
-          xcode-project build-ipa --workspace "$XCODE_WS" --scheme "App"
+          xcode-project build-ipa --workspace $(find ios -name "*.xcworkspace" | head -n 1) --scheme "App"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:

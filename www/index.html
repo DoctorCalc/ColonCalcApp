@@ -126,5 +126,40 @@
             <a href="Riesgo_CCR.html" class="calculator-button" role="button">Calcular Riesgo Familiar</a>
         </div>
     </main>
+    
+<div id="legalModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+    <div style="background-color:white; padding:30px; border-radius:20px; width:85%; max-width:400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); font-family: sans-serif;">
+        <div style="text-align:center; margin-bottom:15px;">
+            <span style="font-size: 50px;">⚠️</span>
+        </div>
+        <h2 style="color:#333; margin-top:0; text-align:center; font-size:22px;">Aviso Legal</h2>
+        <div style="font-size:14px; line-height:1.6; color:#444; margin-bottom:20px; text-align: justify;">
+            <strong>ColonCalc</strong> es una herramienta de apoyo para <strong>profesionales sanitarios</strong>. No está diseñada para pacientes. 
+            <br><br>
+            Los cálculos se basan en literatura científica, pero <strong>no sustituyen el juicio clínico</strong>. El uso de esta app implica la aceptación de que el diagnóstico final es responsabilidad exclusiva del médico.
+        </div>
+        <button id="btnAceptarLegal" style="width:100%; background-color:#1f7832; color:white; border:none; padding:15px; border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,122,255,0.3);">
+            Entiendo y Acepto
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const modal = document.getElementById("legalModal");
+    const btnAceptar = document.getElementById("btnAceptarLegal");
+
+    // Si no ha aceptado antes, mostramos el modal
+    if (!localStorage.getItem("disclaimerAceptado")) {
+        modal.style.display = "flex";
+    }
+
+    // Al aceptar, guardamos en memoria y cerramos
+    btnAceptar.onclick = function() {
+        localStorage.setItem("disclaimerAceptado", "true");
+        modal.style.display = "none";
+    };
+});
+</script>
 </body>
 </html>

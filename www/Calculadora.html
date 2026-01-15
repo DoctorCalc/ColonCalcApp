@@ -2,13 +2,66 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Calculadora Vigilancia CCR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ColonCalc">
+
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="icon" href="./icons/icon-48.png" type="image/png">
+    
+    <script src="js/tailwind.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#0A1C40',
+                        'secondary-teal': '#007D70',
+                        'accent-red': '#D53B3E',
+                    },
+                    fontFamily: {
+                        'poppins': ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
+    /* AÑADIR ESTO: Definir la fuente localmente */
+        @font-face {
+            font-family: 'Poppins';
+            src: url('fonts/poppins-v24-latin-regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Poppins';
+            src: url('fonts/poppins-v24-latin-500.woff2') format('woff2');
+            font-weight: 500;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Poppins';
+            src: url('fonts/poppins-v24-latin-600.woff2') format('woff2');
+            font-weight: 600;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Poppins';
+            src: url('fonts/poppins-v24-latin-700.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Poppins';
+            src: url('fonts/poppins-v24-latin-800.woff2') format('woff2');
+            font-weight: 800;
+            font-style: normal;
+        }
+        
         /* Definir colores personalizados de la paleta */
         :root {
             --color-primary-blue: #0A1C40; /* Azul oscuro del logo DIGESTIVO */
@@ -42,6 +95,21 @@
         .hidden {
             display: none !important;
         }
+        
+        html, body {
+        /* Evita que el usuario seleccione texto accidentalmente al pulsar rápido */
+            -webkit-user-select: none;
+            user-select: none;
+    
+        /* Elimina el retraso de 300ms al pulsar (hace que la app se sienta más rápida) */
+            touch-action: manipulation;
+        }
+
+        /* Pero permite que en los inputs sí se pueda seleccionar texto para borrar/escribir */
+            input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
 
         /* --- ESTILOS PARA COLONCALC (SOLICITADOS) --- */
         .coloncalc-main-title {
@@ -63,7 +131,7 @@
             font-weight: 500; 
         }
         /* --- FIN ESTILOS COLONCALC --- */
-
+        
         /* --- ESTILOS PARA LA VENTANA MODAL (AYUDA SPS) --- */
         .modal-overlay {
             position: fixed;
@@ -113,9 +181,53 @@
             max-width: 420px;
             width: 90%;
         }
-        .about-text {
+        .about-text, .text-justify {
             text-align: justify;
+            hyphens: auto;      /* Divide las palabras largas con guiones si es necesario */
+            text-justify: inter-word; /* Mejora el reparto del espacio */
         }
+        
+        .close-modal {
+        /* Posicionamiento en la esquina */
+            position: absolute;
+            top: 8px;
+            right: 8px;
+    
+        /* Tamaño del área táctil (círculo) */
+            width: 40px;
+            height: 40px;
+    
+        /* Centrado perfecto de la X dentro del círculo */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+    
+        /* Estilo del símbolo */
+            font-size: 30px;
+            font-family: Arial, sans-serif;
+            color: #666;
+            line-height: 0; /* Evita que la X se desplace hacia abajo */
+            cursor: pointer;
+    
+        /* Preparación para la animación */
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        /* EFECTO AL PASAR EL RATÓN (Hover) */
+        .close-modal:hover {
+            background-color: rgba(0, 0, 0, 0.08); /* Círculo gris suave */
+            color: #cc0404;                      /* X en color rojo */
+            transform: rotate(90deg);            /* La X gira un cuarto de vuelta */
+        }
+
+        /* EFECTO AL PULSAR (Active) */
+        .close-modal:active {
+            background-color: rgba(0, 0, 0, 0.15);
+            transform: rotate(90deg) scale(0.9); /* Se encoge un poquito al tocarlo */
+        }
+        
         /* --- ESTILOS PARA LA MODAL DE ERROR (NUEVOS) --- */
         #errorModal .error-modal-content {
             background-color: white;
@@ -152,7 +264,6 @@
             border-radius: 8px;
         }
         /* --- FIN ESTILOS MODALES DE IMAGEN --- */
-        /* Permite transiciones suaves al hacer zoom */
         /* Permite transiciones suaves al hacer zoom */
         .zoomable {
             transition: max-width 0.3s ease-in-out; /* Cambiamos la transición a max-width */
@@ -212,11 +323,37 @@
            background-color: #008f81 !important;
         }
         
+        /* ============ NOTE FOOTER ============ */
+        .note-footer {
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto; /* Para compatibilidad con algunos móviles antiguos */
+            font-size: 0.80rem;    /* Tamaño discreto */
+            color: #6b7280;        /* Gris suave (text-gray-500) */
+            line-height: 1.4;
+            margin-top: 25px;      /* Espacio respecto a la calculadora */
+            padding: 0 5px;        /* Un poco de aire en los bordes */
+        }
+        
+        .footer-version {
+            display: block;        /* Hace que la versión y autor bajen a una línea nueva */
+            margin-top: 8px;
+            font-size: 0.8rem;
+            text-align: center;    /* El copyright suele quedar mejor centrado */
+            opacity: 0.8;
+        }
+        .text-justify {
+            text-align: justify;
+            hyphens: auto;
+            -webkit-hyphens: auto;
+            text-justify: inter-word;
+        }
+
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-8 flex flex-col items-center justify-start md:justify-center">
 
-    <header class="w-full max-w-md mb-6 md:mb-8 bg-white p-4 rounded-xl shadow-lg border border-gray-200">
+    <header class="w-full max-w-md mb-6 bg-white rounded-2xl shadow-2xl p-4 card-container">
         <div class="flex items-center justify-between space-x-4">
             <img src="Logo DoctorCalc.jpg" alt="Logo aplicaciones DoctorCalc" class="h-14 md:h-16 w-auto object-contain">
             <img src="logodige.png" alt="Logo Digestivo" class="h-12 md:h-16 w-auto object-contain">
@@ -384,11 +521,9 @@
             
             <div class="flex space-x-3 mt-3">
                 
-                <button id="backToMenuButton"
+                <button id="backToMenuButton" onclick="window.location.href='index.html'"
                         class="w-1/3 text-sm font-semibold py-3 px-1 rounded-xl shadow-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-150">
-                    <a href="index.html" class="block w-full text-center no-underline text-gray-700">
                         ← Menú
-                    </a>
                 </button>
 
                 <button id="openAboutModal"
@@ -396,11 +531,9 @@
                     Acerca de
                 </button>
 
-                <button id="goToRiesgoCCRButton"
-                        class="w-1/3 text-sm font-semibold py-3 px-1 rounded-xl shadow-md bg-sky-200 text-sky-800 hover:bg-sky-300 transition duration-150">
-                    <a href="Riesgo_CCR.html" class="block w-full text-center no-underline text-sky-800">
-                        Riesgo CCR →
-                    </a>
+                <button id="goToRiesgoCCRButton" onclick="window.location.href='Riesgo_CCR.html'"
+                        class="w-1/3 text-sm font-semibold py-3 px-1 rounded-xl shadow-md bg-green-100 text-sky-800 hover:bg-green-300 transition duration-150">
+                    Riesgo CCR →
                 </button>
             </div>
         </div>
@@ -414,12 +547,15 @@
             </div>
         </div>
 
-        <div class="text-center mt-6">
-            <p class="text-xs text-gray-400">
+         <!-- ============ FOOTER NOTE ============ -->
+        <div class="note-footer">
+            <em>
                 Esta herramienta es una guía basada en los algoritmos de la ESGE 2020.
-                No sustituye el juicio clínico profesional.<br>
-                Versión 1.0.0. © Paco Casado. Granada 2025
-            </p>
+                No sustituye el juicio clínico profesional.
+                <span class="footer-version">
+                        Versión 1.0.9. © Paco Casado. Granada 2025.
+                </span>
+            </em>
         </div>
 
     </div>
@@ -1036,14 +1172,14 @@
 
                 // 2. VIGILANCIA A CORTO PLAZO (Fragmentación)
                 } else if (isSessile20 && isFragmented) {
-                    recommendation = 'Colonoscopia en 4-6 meses';
+                    recommendation = 'Colonoscopia en 3-6 meses';
                     category = 'VIGILANCIA A CORTO PLAZO';
                     boxClasses += 'bg-red-100 border-red-700';
                     titleColor = 'text-red-900';
                     textColor = 'text-red-800';
                     categoryColor = 'text-red-700';
                     
-                    disclaimerText = "ATENCIÓN: La colonoscopia de control a los 4-6 meses definirá el seguimiento. Si se comprueba resección completa, se continúa con Vigilancia Intensiva (colonoscopia al año). Si queda residuo de lesión, se debe remitir a CAR (Consulta de Alto Riesgo).";
+                    disclaimerText = "ATENCIÓN: La colonoscopia de control a los 3-6 meses definirá el seguimiento. Si se comprueba resección completa, se continúa con Vigilancia Intensiva (colonoscopia al año). Si queda residuo de lesión, se debe remitir a CAR (Consulta de Alto Riesgo).";
 
                 // 3. VIGILANCIA INTENSIVA (Lesión sésil 20mm o >= 10 pólipos)
                 } else if (isSessile20 || numPolyps >= 10) {
@@ -1103,7 +1239,10 @@
                 resultTitle.className = `font-extrabold text-2xl mb-2 ${titleColor}`;
                 resultText.className = `text-3xl font-bold ${textColor}`;
                 resultCategory.className = `text-base font-semibold opacity-95 mt-2 ${categoryColor}`;
-
+                
+                // 🔥 Añade esta línea para justificar el disclaimer:
+                resultDisclaimer.className = `text-justify mt-4 pt-4 border-t border-gray-300 text-sm opacity-90 ${textColor}`;
+                
                 resultTitle.textContent = 'Recomendación:';
                 resultText.textContent = recommendation;
                 resultCategory.textContent = `Categoría: ${category}`;
@@ -1124,15 +1263,19 @@
                 // --- FIN CÓDIGO ACTUALIZADO ---
             });
         });
+        
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW activo para este módulo'))
+        .catch(err => console.error('Error al verificar SW', err));
+    });
+  }
     </script>
     <div id="aboutModal" class="modal-overlay hidden">
         <div class="modal-content modal-large">
             
-            <button id="closeAboutModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 transition focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+            <span id="closeAboutModal" class="close-modal" title="Cerrar">&times;</span>
             
             <div class="mb-4">
                 <video id="doctorCalcVideo" width="100%" playsinline autoplay muted preload="metadata"> 
@@ -1147,7 +1290,10 @@
                     ColonCalc es una aplicación desarrollada por <strong>DoctorCalc ©</strong>, basada en las recomendaciones de las guías <em>"Post-polypectomy colonoscopy surveillance: European Society
                     of Gastrointestinal Endoscopy (ESGE) Guideline – Update 2020"</em>, <em>"Endoscopic management of Lynch syndrome and of familial risk of
                     colorectal cancer: European Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> y <em>"Endoscopic management of polyposis syndromes: European
-                    Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> de 2019, publicadas en la revista Endoscopy 2019-2020. Está dirigida exclusivamente a profesionales de la salud. No sustituye al juicio clínico.<br>Versión 1.0.0. © Paco Casado. Granada 2025
+                    Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> de 2019, publicadas en la revista Endoscopy 2019-2020. Está dirigida exclusivamente a profesionales de la salud. No sustituye al juicio clínico.
+                    <span class="footer-version">
+                        Versión 1.0.8. © Paco Casado. Granada 2025.
+                    </span>
                 </div>
             </div>
         </div>
@@ -1155,11 +1301,7 @@
     <div id="qualityHelpModal" class="modal-overlay hidden">
         <div class="modal-content modal-large">
             
-            <button id="closeQualityHelpModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-900 transition focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+            <span id="closeQualityHelpModal" class="close-modal" title="Cerrar">&times;</span>
             
             <h3 class="text-xl font-bold text-[var(--color-secondary-teal)] mb-4">Criterios de Calidad de la Colonoscopia</h3>
 
@@ -1199,7 +1341,7 @@
  
     <div id="bostonModal" class="modal-overlay hidden">
         <div class="image-modal-content">
-            <button id="closeBostonModal" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+            <button id="closeBostonModal" class="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full text-gray-800 hover:text-black shadow-lg transition-all active:scale-95 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
             </button>
             <h4 class="text-center font-bold text-lg mb-2">Escala de Preparación de Boston</h4>
@@ -1211,7 +1353,7 @@
 
     <div id="parisModal" class="modal-overlay hidden">
         <div class="image-modal-content">
-            <button id="closeParisModal" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+            <button id="closeParisModal" class="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full text-gray-800 hover:text-black shadow-lg transition-all active:scale-95 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
             </button>
             <h4 class="text-center font-bold text-lg mb-2">Clasificación de Morfología de París</h4>
@@ -1223,7 +1365,7 @@
 
     <div id="jnetModal" class="modal-overlay hidden">
         <div class="image-modal-content">
-            <button id="closeJNETModal" class="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-900 transition focus:outline-none">
+            <button id="closeJNETModal" class="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full text-gray-800 hover:text-black shadow-lg transition-all active:scale-95 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
             </button>
             <h4 class="text-center font-bold text-lg mb-2">Clasificación JNET (Para Neoplasias Colorrectales)</h4>

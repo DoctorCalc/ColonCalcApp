@@ -2,14 +2,23 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Identificador de riesgo CCR</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ColonCalc">
+
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="icon" href="./icons/icon-48.png" type="image/png">
+  
   <style>
 :root{
-  --bg:#eef2ff;
-  --card:#ffffff;
-  --accent:#0044cc;
-  --accent-light:#e0e8ff;
+  --bg:rgba(213, 247, 214, 0.3); /* color de fondo */
+  --card:#ffffff;   /* color de la modal */
+  --accent:#006400;  /* verde oscuro */
+  --accent-light:rgba(165, 214, 165, 0.5); /* color de las ventanitas check */
   --text:#222;
 }
 body{
@@ -18,6 +27,22 @@ body{
   background:var(--bg);
   color:var(--text);
 }
+
+html, body {
+  /* Evita que el usuario seleccione texto accidentalmente al pulsar rápido */
+  -webkit-user-select: none;
+  user-select: none;
+    
+  /* Elimina el retraso de 300ms al pulsar (hace que la app se sienta más rápida) */
+  touch-action: manipulation;
+}
+
+/* Pero permite que en los inputs sí se pueda seleccionar texto para borrar/escribir */
+  input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .container{
   max-width:950px;
   margin:20px auto;
@@ -28,19 +53,28 @@ header{
   align-items:center;
   gap:16px;
   padding:16px;
-  border-bottom:2px solid #002b80;
-  background:#dfe8ff;
+  border-bottom:5px solid #062106;
+  background:#006400;
 }
 header img{height:56px;width:auto;object-fit:contain;}
 header .title{line-height:1;}
-h1{font-size:1.9rem;margin:0;color:#002b80;}
-.muted{color:#445;font-size:0.95rem;margin-top:6px;}
+
+#main-card .small {
+    margin-top: 5px;
+    font-weight: 500; /* Un pelín más de peso para que guíe mejor al usuario */
+}
+
+h1{font-size:1.9rem;margin:0;color:#f4f4f4;}
+.muted{color:#f4f4f4;font-size:0.95rem;margin-top:6px;}
 .card{
   background:var(--card);
   border-radius:14px;
   box-shadow:0 4px 16px rgba(0,0,0,.12);
   padding:20px;
   margin-top:18px;
+}
+.accent-green {
+    accent-color: #006400;
 }
 .grid{
   display:grid;
@@ -54,12 +88,12 @@ label.checkbox{
   padding:14px;
   border-radius:12px;
   background:var(--accent-light);
-  border:1px solid #d0d4e8;
+  border:1px solid #006400;
 
   /* ⭐ Relieve / sombra moderna */
   box-shadow: 
-      0 2px 4px rgba(0,0,0,0.10),
-      0 4px 10px rgba(0,0,0,0.08);
+      0 2px 4px rgba(0,0,0,0.20),
+      0 4px 10px rgba(0,0,0,0.15);
 
   transition:0.22s ease;
   align-items:flex-start;
@@ -67,21 +101,21 @@ label.checkbox{
 
 /* ⭐ efecto al pasar el dedo/ratón */
 label.checkbox:hover{
-  background:#f5f7ff;
+  background:rgba(213, 237, 215, 0.5);
   box-shadow:
-      0 3px 6px rgba(0,0,0,0.12),
-      0 6px 14px rgba(0,0,0,0.10);
+      0 3px 6px rgba(0,0,0,0.25),
+      0 6px 14px rgba(0,0,0,0.20);
   transform: translateY(-2px);
 }
 
 /* ⭐ cuando el checkbox está marcado */
 label.checkbox input:checked + span,
 label.checkbox:has(input:checked){
-  background:#e7edff;
-  border-color:#8aa0ff;
+  background:#daf2db;
+  border-color:#006400;
   box-shadow:
       0 4px 10px rgba(0,0,0,0.15),
-      inset 0 0 0 2px #8aa0ff;
+      inset 0 0 0 2px #006400;
 }
 .actions {
   display:flex;
@@ -106,20 +140,20 @@ button{
 
   /* relieve */
   box-shadow:
-      0 4px 0 #003799,      /* borde inferior tipo botón físico */
+      0 4px 0 #062106,      /* borde inferior tipo botón físico */
       0 6px 12px rgba(0,0,0,0.18); /* sombra suave exterior */
 
   transition:transform .15s, box-shadow .15s, background .2s;
 }
 
 button:hover{
-  background:#0082e6;
+  background:#43a158;
 }
 
 button:active{
   transform:translateY(2px);     /* hundimiento */
   box-shadow:
-      0 2px 0 #003799,
+      0 2px 0 #062106,
       0 3px 6px rgba(0,0,0,0.18);
 }
 
@@ -147,14 +181,58 @@ button.secondary:active{
   opacity:1;
   scroll-margin-top: 120px; /* evita que quede pegado arriba */
 }
+
+/* Estilos comunes para todas las notas informativas de resultados */
+.small,
+.lynch-note, 
+.gene-note, 
+.adeno-note, 
+.young-note, 
+.serrated-note, 
+.sps-note
+.text-justify {
+    display: block !important;
+    text-align: justify !important;
+    text-justify: inter-word !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+    line-height: 1.5;
+    /* Importante: que no haya word-break: break-all que rompa el icono */
+    word-break: break-word; 
+}
+
+/* Evitamos que el icono se mueva de su sitio */
+.result-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
 #pregunta-num-fpg,
 #pregunta-edad-fpg,
 #result {
   scroll-margin-top: 120px;
 }
 
-.result.ok{background:#d9f7d9;border-left:6px solid #2ca02c;}
-.result.ok:before{content:"✅ ";margin-right:6px;font-weight:bold;}
+.result.ok {
+    background: #d9f7d9;
+    border-left: 6px solid #2ca02c;
+    padding: 15px; /* Para que el texto no toque los bordes */
+}
+
+/* Esto es lo que permite que el texto se cuadre */
+.result.ok.text-justify {
+    display: block !important;
+    text-align: justify !important;
+    hyphens: auto !important;
+    -webkit-hyphens: auto !important;
+}
+
+/* Si usas un p dentro, que sea bloque también */
+.result.ok p {
+    display: block; 
+    margin: 0;
+}
 .result.warn{background:#ffe8e8;border-left:6px solid #cc0000;border:2px solid #cc0000;}
 .hidden{display:none !important;}
 select,input[type=number],input[type=text]{
@@ -172,7 +250,25 @@ select,input[type=number],input[type=text]{
   .actions{flex-direction:column;}
   button{width:100%;}
 }
-.footer{margin-top:18px;font-size:0.9rem;color:#333;padding-top:8px;border-top:1px solid #eee;}
+.footer {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto; /* Para compatibilidad con algunos móviles antiguos */
+  font-size: 0.80rem;    /* Tamaño discreto */
+  color: #6b7280;        /* Gris suave (text-gray-500) */
+  line-height: 1.4;
+  margin-top: 25px;      /* Espacio respecto a la calculadora */
+  padding: 0 5px;        /* Un poco de aire en los bordes */
+}
+
+.footer-version {
+  display: block;        /* Hace que la versión y autor bajen a una línea nueva */
+  margin-top: 8px;
+  font-size: 0.8rem;
+  text-align: center;    /* El copyright suele quedar mejor centrado */
+  opacity: 0.8;
+}
+
 .small{font-size:.95rem;color:#333;}
 
 .nav-buttons {
@@ -196,7 +292,7 @@ select,input[type=number],input[type=text]{
   gap: 6px;
 
   box-shadow:
-      0 4px 0 #003799,
+      0 4px 0 #062106,
       0 5px 10px rgba(0,0,0,0.18);
 
   transition: transform .15s, box-shadow .15s;
@@ -205,7 +301,7 @@ select,input[type=number],input[type=text]{
 .nav-buttons .mini-btn:active{
   transform:translateY(2px);
   box-shadow:
-      0 2px 0 #003799,
+      0 2px 0 #062106,
       0 3px 6px rgba(0,0,0,0.18);
 }
 
@@ -244,7 +340,7 @@ select,input[type=number],input[type=text]{
 <body>
   <div class="container">
     <header>
-      <img src="logodige.png" alt="Logo Servicio" />
+      <img src="logodige.jpg" alt="Logo Servicio" />
       <div class="title">
         <h1>Identificador de riesgo de CCR</h1>
         <div class="muted">Basado en los antecedentes personales/familiares</div>
@@ -256,16 +352,16 @@ select,input[type=number],input[type=text]{
 
       <form id="risk-form" autocomplete="off" novalidate>
         <div class="grid" role="group" aria-label="Antecedentes personales y familiares">
-          <label class="checkbox"><input type="checkbox" name="factor" value="ihq" /> Historia personal o familiar de CCR con alteración de genes reparadores ADN (IHQ/IMS)</label>
-          <label class="checkbox"><input type="checkbox" name="factor" value="fpg_50" /> Historia personal o familiar de primer grado (FPG) con CCR ≤50 años</label>
-          <label class="checkbox"><input type="checkbox" name="factor" value=">=2fpg" /> ≥ 2 FPG con CCR (o área Lynch) (cualquier edad)</label>
-          <label class="checkbox"><input type="checkbox" name="factor" value=">=20_adenomas" /> Historia personal o FPG con ≥20 adenomas acumulados a cualquier edad</label>
-          <label class="checkbox"><input type="checkbox" name="factor" value="young_10adenomas_or_advanced" /> Historia personal o FPG ≤40 años con ≥10 adenomas acumulados o adenoma avanzado o manifestaciones extracolónicas de PAF</label>
-          <label class="checkbox"><input type="checkbox" name="factor" value="serrated_criteria" /> Historia personal de ≥5 lesiones serradas proximales al ángulo esplénico o ≥2 lesiones serradas acumuladas de ≥10mm proximales</label>
-          <label class="checkbox"><input type="checkbox" name="factor" value="sps" /> FPG de paciente con Síndrome Polipósico Serrado</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value="ihq" /> Historia personal o familiar de CCR con alteración de genes reparadores ADN (IHQ/IMS)</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value="fpg_50" /> Historia personal o familiar de primer grado (FPG) con CCR ≤50 años</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value=">=2fpg" /> ≥ 2 FPG con CCR (o área Lynch) (cualquier edad)</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value=">=20_adenomas" /> Historia personal o FPG con ≥20 adenomas acumulados a cualquier edad</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value="young_10adenomas_or_advanced" /> Historia personal o FPG ≤40 años con ≥10 adenomas acumulados o adenoma avanzado o manifestaciones extracolónicas de PAF</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value="serrated_criteria" /> Historia personal de ≥5 lesiones serradas proximales al ángulo esplénico o ≥2 lesiones serradas acumuladas de ≥10mm proximales</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value="sps" /> FPG de paciente con Síndrome Polipósico Serrado</label>
 
           <!-- casilla "ninguno" -->
-          <label class="checkbox"><input type="checkbox" name="factor" value="ninguno" /> No tengo ninguno de estos antecedentes</label>
+          <label class="checkbox"><input type="checkbox" class="accent-green" name="factor" value="ninguno" /> No tengo ninguno de estos antecedentes</label>
         </div>
               
         <div class="actions">
@@ -274,13 +370,13 @@ select,input[type=number],input[type=text]{
           <div style="margin-left:auto" class="small">El resultado aparecerá aquí abajo.</div>
         </div>
         <div class="nav-buttons">
-          <a href="index.html">
-          <button type="button" class="mini-btn secondary">← Menú principal</button>
-          </a>
+            <button type="button" class="mini-btn secondary" onclick="window.location.href='index.html'">
+                ← Menú principal
+            </button>
 
-          <a href="Calculadora.html">
-          <button type="button" class="mini-btn">Calculadora →</button>
-          </a>
+            <button type="button" class="mini-btn" onclick="window.location.href='Calculadora.html'">
+                Calculadora →
+            </button>
         </div>
 
         <div id="result" class="result hidden" aria-live="polite"></div>
@@ -288,8 +384,8 @@ select,input[type=number],input[type=text]{
         <div id="no-antecedents" class="card hidden" style="margin-top:12px;padding:12px">
           <p class="small"><strong>¿Tiene una colonoscopia con lesiones que precisen vigilancia?</strong></p>
           <div style="display:flex;gap:12px;align-items:center;margin-top:8px;">
-            <label><input type="radio" name="colon-lesion" value="yes"> Sí</label>
-            <label><input type="radio" name="colon-lesion" value="no"> No</label>
+            <label><input type="radio" class="accent-green" name="colon-lesion" value="yes"> Sí</label>
+            <label><input type="radio" class="accent-green" name="colon-lesion" value="no"> No</label>
           </div>
 
           <div id="lesion-calculator" class="hidden" style="margin-top:12px">
@@ -340,7 +436,7 @@ select,input[type=number],input[type=text]{
 
                 <button id="eval-familiares" type="button" 
                         style="margin-top:14px; padding:8px 12px; font-size:0.9rem;
-                               border-radius:8px; cursor:pointer; background:#0044cc; color:white;">
+                               border-radius:8px; cursor:pointer; background:#006400; color:white;">
                   Evaluar
                 </button>
             </div>
@@ -348,9 +444,9 @@ select,input[type=number],input[type=text]{
             <!-- Cuando hay 1 familiar de primer grado -->
             <div id="pregunta-edad-fpg" class="hidden" style="margin-top:16px;">
               <label class="small"><strong>Edad del familiar de primer grado cuando fue diagnosticado:</strong></label><br>
-              <label><input type="radio" name="edad-fpg" value="le50"> ≤ 50 años</label>
+              <label><input type="radio" class="accent-green" name="edad-fpg" value="le50"> ≤ 50 años</label>
               <label style="margin-left:10px;">
-                <input type="radio" name="edad-fpg" value="gt50"> > 50 años
+                <input type="radio" class="accent-green" name="edad-fpg" value="gt50"> > 50 años
               </label>
             </div>
 
@@ -362,11 +458,15 @@ select,input[type=number],input[type=text]{
       </form>
     </section>
 
+    <!-- ============ FOOTER NOTE ============ -->
     <div class="footer">
-      <strong>Nota:</strong> Esta aplicación implementa las recomendaciones de las guías de la ESGE sobre CCR familiar de 2019 (Lynch y síndromes polipósicos), para hacer una evaluación rápida del riesgo. No sustituye la valoración clínica. Para criterios complejos (confirmación de síndromes genéticos, pruebas moleculares o decisiones de derivación), siga el protocolo local o derive a Unidad de Alto Riesgo.<br> Versión 1.0.0 © Paco Casado. Granada
+        <em>
+            Esta aplicación implementa las recomendaciones de las guías de la ESGE sobre CCR familiar de 2019 (Lynch y síndromes polipósicos), para hacer una evaluación rápida del riesgo. No sustituye la valoración clínica. Para criterios complejos (confirmación de síndromes genéticos, pruebas moleculares o decisiones de derivación), siga el protocolo local o derive a Unidad de Alto Riesgo.
+            <span class="footer-version">
+                        Versión 1.0.9. © Paco Casado. Granada 2025.
+            </span>
+        </em>
     </div>
-
-  </div>
 
   <!-- modal -->
   <div id="modal-riesgo" class="hidden" aria-hidden="true">
@@ -500,6 +600,7 @@ riskChecks.forEach(chk => {
 
 
   // Evaluate
+  const msgNoRiesgo = "No se identifican criterios de alto riesgo de cáncer colorrectal. Realizar cribado con test de sangre oculta en heces cada 2 años según el Programa de Detección Precoz de CCR, si está dentro del rango de edad (50 - 69 años). Si es mayor de 69 años, dependerá de su estado de salud y su historial clínico. En este caso, consulte a su médico.";
   evaluateBtn?.addEventListener('click', function(){
     try{
       safeHide(noAnte, lesionCalculator, familySection, preguntaNumFPG, preguntaEdadFPG);
@@ -523,15 +624,18 @@ riskChecks.forEach(chk => {
       const vals = checked.map(i=>i.value);
 
       // If only "ninguno" is selected
-      if(vals.includes('ninguno') && vals.length===1){
-        resultBox.className='result ok';
-        resultBox.textContent = "No se identifican criterios de alto riesgo de cáncer colorrectal. Realizar cribado con test de sangre oculta en heces cada 2 años según el Programa de Detección Precoz de CCR, si está dentro del rango de edad (50 - 69 años). Si es mayor de 69 años, dependerá de su estado de salud y su historial clínico. En este caso, consulte a su médico.";
-        safeShow(resultBox);
-      // Desplazar a resultado en móvil
-         setTimeout(() => {
-         resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
-      }, 150);
-      return;
+      if(vals.includes('ninguno') && vals.length === 1){
+          resultBox.className = 'result ok text-justify'; 
+    
+          // Icono pegado al texto. El espacio &nbsp; asegura un hueco fijo tras el check.
+          resultBox.innerHTML = `✅&nbsp; ${msgNoRiesgo}`;
+    
+          safeShow(resultBox);
+    
+          setTimeout(() => {
+              resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 150);
+          return;
       }
 
       const highRiskCriteria = ['ihq','fpg_50','>=2fpg','>=20_adenomas','young_10adenomas_or_advanced','serrated_criteria','sps'];
@@ -548,9 +652,11 @@ riskChecks.forEach(chk => {
             const lynchNote = document.createElement('div');
             lynchNote.className = 'small lynch-note';
             lynchNote.style.marginTop = '10px';
-            lynchNote.innerHTML = 
-             'No solo por tener dos o más casos de cáncer colorrectal en familiares de primer grado de cualquier edad, sino tambien por tener familiares con otros tumores asociados al síndrome de Lynch (endometrio, ovario, estómago, intestino delgado, vías urinarias altas, hepatobiliar, cerebro y piel tipo sebáceo). ' +
-             'En estos casos, se recomienda valoración en Consulta de Alto Riesgo para estudio genético y planificación de vigilancia personalizada. Haremos antes unas comprobaciones para evaluar el riesgo verdadero.';
+            lynchNote.innerHTML = ` 
+            No solo por tener dos o más casos de cáncer colorrectal en familiares de primer grado de cualquier edad, sino tambien por tener familiares con otros tumores asociados al síndrome de Lynch (endometrio, ovario, estómago, intestino delgado, vías urinarias altas, hepatobiliar, cerebro y piel tipo sebáceo).
+            En estos casos, se recomienda valoración en Consulta de Alto Riesgo para estudio genético y planificación de vigilancia personalizada.
+            Haremos antes unas comprobaciones para evaluar el riesgo verdadero.
+        `;
             resultBox.appendChild(lynchNote);
           }
         }
@@ -560,9 +666,11 @@ riskChecks.forEach(chk => {
             const geneNote = document.createElement('div');
             geneNote.className = 'small gene-note';
             geneNote.style.marginTop = '10px';
-            geneNote.innerHTML = 
-             'Si el paciente (o sus familiares) ha tenido un CCR con variantes patogénicas de algunos de los genes reparadores (MMR) MLH1, MSH2, MSH6, PMS2 o delección en la región 3 prima del gen EpCAM (investigados en los tumores), hay que estudiarlo por si tiene un Síndrome de Lynch. Remitir a consulta de alto riesgo. ' +
-             'En caso de tenerlas, se indicaría colonoscopia <strong>cada 2 años</strong> a partir de los 25 para portadores de mutaciones MLH1 y MSH2, y a partir de los 35 años para MSH6 y PMS2, siempre que estén asintomáticos.';
+            geneNote.innerHTML = ` 
+            Si el paciente (o sus familiares) ha tenido un CCR con variantes patogénicas de algunos de los genes reparadores (MMR) MLH1, MSH2, MSH6, PMS2 o delección en la región 3 prima del gen EpCAM (investigados en los tumores), hay que estudiarlo por si tiene un Síndrome de Lynch.
+            Remitir a consulta de alto riesgo.
+            En caso de tenerlas, se indicaría colonoscopia <strong>cada 2 años</strong> a partir de los 25 para portadores de mutaciones MLH1 y MSH2, y a partir de los 35 años para MSH6 y PMS2, siempre que estén asintomáticos.
+        `; 
             resultBox.appendChild(geneNote);
           }
         }
@@ -572,9 +680,16 @@ riskChecks.forEach(chk => {
             const adenoNote = document.createElement('div');
             adenoNote.className = 'small adeno-note';
             adenoNote.style.marginTop = '10px';
-            adenoNote.innerHTML = 
-             'La presencia de 20 o más adenomas puede indicar una poliposis de origen genético. La Poliposis Adenomatosa Familiar (PAF) es causada por una mutación en el gen APC, de transimisión autosómica dominante. Se caracteriza por entre 100 y 1000 adenomas y se asocia a manifestaciones extracolónicas.' +
-             ' En la PAF atenuada hay < 100 adenomas y no siempre se detecta la mutación. La PAM se produce por mutación bialélica en el gen MUTYH y se caracteriza por entre 20 y 100 adenomas. Remitir a consulta de alto riesgo para estudio de <strong>oligopoliposis</strong>. Se recomienda colonoscopia para PAF desde los 12-14 años y para PAM desde los 18 años. En caso de colon intacto, el intervalo será entre <strong>1 y 2 años</strong>, según el número de pólipos.';
+            adenoNote.innerHTML = ` 
+            La presencia de 20 o más adenomas puede indicar una poliposis de origen genético.
+            La Poliposis Adenomatosa Familiar (PAF) es causada por una mutación en el gen APC, de transimisión autosómica dominante.
+            Se caracteriza por entre 100 y 1000 adenomas y se asocia a manifestaciones extracolónicas.
+            En la PAF atenuada hay < 100 adenomas y no siempre se detecta la mutación.
+            La PAM se produce por mutación bialélica en el gen MUTYH y se caracteriza por entre 20 y 100 adenomas.
+            Remitir a consulta de alto riesgo para estudio de <strong>oligopoliposis</strong>.
+            Se recomienda colonoscopia para PAF desde los 12-14 años y para PAM desde los 18 años.
+            En caso de colon intacto, el intervalo será entre <strong>1 y 2 años</strong>, según el número de pólipos.
+        `;
             resultBox.appendChild(adenoNote);
           }
         }
@@ -584,9 +699,15 @@ riskChecks.forEach(chk => {
             const youngNote = document.createElement('div');
             youngNote.className = 'small young-note';
             youngNote.style.marginTop = '10px';
-            youngNote.innerHTML = 
-             'La presencia de 10 o más adenomas en pacientes jóvenes puede indicar una poliposis de origen genético. Las manifestaciones asociadas a la PAF son adenomas duodenales/ampulares, tumores desmoides, cáncer papilar de tiroides, hipertrofia congénita del epitelio pigmentario de la retina, quistes epidérmicos y osteomas. La Poliposis Adenomatosa Familiar (PAF) es causada por una mutación en el gen APC, de transimisión autosómica dominante. Se caracteriza por entre 100 y 1000 adenomas y se asocia a manifestaciones extracolónicas.' +
-             ' En la PAF atenuada hay < 100 adenomas y no siempre se detecta la mutación. La PAM se produce por mutación bialélica en el gen MUTYH y se caracteriza por entre 20 y 100 adenomas. Remitir a consulta de alto riesgo. Se recomienda colonoscopia para PAF desde los 12-14 años y para PAM desde los 18 años.';
+            youngNote.innerHTML = ` 
+            La presencia de 10 o más adenomas en pacientes jóvenes puede indicar una poliposis de origen genético.
+            Las manifestaciones asociadas a la PAF son adenomas duodenales/ampulares, tumores desmoides, cáncer papilar de tiroides, hipertrofia congénita del epitelio pigmentario de la retina, quistes epidérmicos y osteomas.
+            La Poliposis Adenomatosa Familiar (PAF) es causada por una mutación en el gen APC, de transimisión autosómica dominante.
+            Se caracteriza por entre 100 y 1000 adenomas y se asocia a manifestaciones extracolónicas.
+            En la PAF atenuada hay < 100 adenomas y no siempre se detecta la mutación.
+            La PAM se produce por mutación bialélica en el gen MUTYH y se caracteriza por entre 20 y 100 adenomas.
+            Remitir a consulta de alto riesgo. Se recomienda colonoscopia para PAF desde los 12-14 años y para PAM desde los 18 años.
+        `; 
             resultBox.appendChild(youngNote);
           }
         }
@@ -596,9 +717,13 @@ riskChecks.forEach(chk => {
             const serratedNote = document.createElement('div');
             serratedNote.className = 'small serrated-note';
             serratedNote.style.marginTop = '10px';
-            serratedNote.innerHTML = 
-             'Se consideran lesiones serradas los <i>pólipos hiperplásicos, las lesiones serradas sésiles</i> y los <i>adenomas serrados tradicionales</i>. La presencia de 5 o más lesiones serradas proximales al ángulo esplénico o 2 o más lesiones serradas avanzadas (≥10mm o con displasia) requiere vigilancia. Aunque no cumpla criterios de la OMS de Síndrome de Poliposis Serrada, se suma el número total de pólipos serrados que se extirpan en sucesivas colonoscopias, por lo que hay que estar atentos.' +
-             ' La vigilancia requiere colonoscopia a los <strong>3 años</strong>, como en los adenomas, siempre que se hayan extirpado menos de 10 lesiones serradas. Si hay >10 (excepto hiperplásicos de recto-sigma de <10mm), la vigilancia será intensiva con colonoscopia en <strong>1 año</strong>.';
+            serratedNote.innerHTML = ` 
+            Se consideran lesiones serradas los <i>pólipos hiperplásicos, las lesiones serradas sésiles</i> y los <i>adenomas serrados tradicionales</i>.
+            La presencia de 5 o más lesiones serradas proximales al ángulo esplénico o 2 o más lesiones serradas avanzadas (≥10mm o con displasia) requiere vigilancia.
+            Aunque no cumpla criterios de la OMS de Síndrome de Poliposis Serrada, se suma el número total de pólipos serrados que se extirpan en sucesivas colonoscopias, por lo que hay que estar atentos.
+            La vigilancia requiere colonoscopia a los <strong>3 años</strong>, como en los adenomas, siempre que se hayan extirpado menos de 10 lesiones serradas.
+            Si hay >10 (excepto hiperplásicos de recto-sigma de <10mm), la vigilancia será intensiva con colonoscopia en <strong>1 año</strong>.
+        `;
             resultBox.appendChild(serratedNote);
           }
         }
@@ -606,11 +731,18 @@ riskChecks.forEach(chk => {
         if (vals.includes('sps')) {
           if (!resultBox.querySelector('.sps-note')) {
             const spsNote = document.createElement('div');
-            spsNote.className = 'small serrated-note';
-            spsNote.style.marginTop = '10px';
-            spsNote.innerHTML = 
-             'Se define el Síndrome de Poliposis Serrada (SPS) según los criterios de la OMS (2019). Tiene que presentar uno de los siguientes criterios: <strong>criterio 1:</strong> ≥5 pólipos serrados en colon proximal de ≥5mm y, al menos, dos de ellos tienen que ser ≥10mm. <strong>Criterio 2:</strong> >20 pólipos serrados de cualquier tamaño en todo el colon, con ≥5 en colon proximal. Se considera la forma de poliposis más frecuente.' +
-             ' Se agrupa dentro de los síndromes hereditarios, aunque no se ha encontrado ninguna mutación. Si el FPG tiene una colonoscopia con criterios de SPS, remitir a consulta de alto riesgo. Requiere nueva colonoscopia <strong>al año</strong>, siempre que se hayan extirpado todos los pólipos. Tras esa, se puede hacer cada 2 años sin no hay lesiones avanzadas o se extirpan <5 pólipos serrados. Si no tiene colonoscopia, habrá que solicitarla a partir de los 45 años y, si no hay pólipos, cada 5 años.';
+            spsNote.className = 'small sps-note';
+            spsNote.style.marginTop = '15px';
+            spsNote.innerHTML = spsNote.innerHTML = `
+            Se define el Síndrome de Poliposis Serrada (SPS) según los criterios de la OMS (2019). 
+            Tiene que presentar uno de los siguientes criterios: <strong>criterio 1:</strong> ≥5 pólipos serrados en colon proximal de ≥5mm y, al menos, dos de ellos tienen que ser ≥10mm. 
+            <strong>Criterio 2:</strong> >20 pólipos serrados de cualquier tamaño en todo el colon, con ≥5 en colon proximal. 
+            Se considera la forma de poliposis más frecuente. Se agrupa dentro de los síndromes hereditarios, aunque no se ha encontrado ninguna mutación. 
+            Si el FPG tiene una colonoscopia con criterios de SPS, remitir a consulta de alto riesgo. 
+            Requiere nueva colonoscopia <strong>al año</strong>, siempre que se hayan extirpado todos los pólipos. 
+            Tras esa, se puede hacer cada 2 años si no hay lesiones avanzadas o se extirpan <5 pólipos serrados. 
+            Si no tiene colonoscopia, habrá que solicitarla a partir de los 45 años y, si no hay pólipos, cada 5 años.
+        `;
             resultBox.appendChild(spsNote);
           }
         }               
@@ -639,8 +771,9 @@ riskChecks.forEach(chk => {
           safeHide(noAnte);
         }
       } else {
-        resultBox.className='result ok';
-        resultBox.textContent='No se identifican criterios de alto riesgo de cáncer colorrectal. Realizar cribado con test de sangre oculta en heces cada 2 años según el Programa de Detección Precoz de CCR, si está dentro del rango de edad (50 - 69 años). Si es mayor de 69 años, dependerá de su estado de salud y su historial clínico. En este caso, consulte a su médico.';
+          resultBox.className = 'result ok text-justify'; // Aplicamos justificación
+          resultBox.innerHTML = `<p>${msgNoRiesgo}</p>`;
+      
         safeShow(resultBox);
       // Desplazar a resultado en móvil
          setTimeout(() => {
@@ -741,6 +874,14 @@ document.querySelectorAll('input[name="edad-fpg"]').forEach(r => {
   safeHide(resultBox, noAnte, lesionCalculator, familySection, preguntaNumFPG, preguntaEdadFPG, modal);
 
 });
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW activo para este módulo'))
+        .catch(err => console.error('Error al verificar SW', err));
+    });
+  }
 </script>
 
 </body>

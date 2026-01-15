@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Identificador de riesgo CCR</title>
   
-  <link rel="manifest" href="./manifest.json">
+  <link rel="manifest" href="/ColonCalcApp/www/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ColonCalc">
 
-  <link rel="apple-touch-icon" href="./icons/icon-192.png">
-  <link rel="icon" href="./icons/icon-48.png" type="image/png">
+  <link rel="apple-touch-icon" href="/ColonCalcApp/www/icons/icon-192.png">
+  <link rel="icon" href="/ColonCalcApp/www/icons/icon-48.png" type="image/png">
   
   <style>
 :root{
@@ -877,7 +877,7 @@ document.querySelectorAll('input[name="edad-fpg"]').forEach(r => {
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
+      navigator.serviceWorker.register('/ColonCalcApp/www/sw.js')
         .then(reg => console.log('SW activo para este módulo'))
         .catch(err => console.error('Error al verificar SW', err));
     });

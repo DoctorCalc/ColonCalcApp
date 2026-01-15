@@ -2,7 +2,7 @@
   "name": "ColonCalc",
   "short_name": "ColonCalc",
   "description": "Calculadora de Riesgo de Cáncer Colorrectal",
-  "start_url": "index.html",
+  "start_url": "/ColonCalcApp/www/index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",

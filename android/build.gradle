@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.13.2'
+        classpath 'com.android.tools.build:gradle:9.0.0'
         classpath 'com.google.gms:google-services:4.4.2'
     }
 }
@@ -19,7 +19,7 @@ allprojects {
         mavenCentral()
     }
 
-    // AÑADE ESTO DESDE AQUÍ:
+    // Aï¿½ADE ESTO DESDE AQUï¿½:
     configurations.all {
         resolutionStrategy.eachDependency { DependencyResolveDetails details ->
             if (details.requested.group == 'org.jetbrains.kotlin') {
@@ -27,7 +27,7 @@ allprojects {
             }
         }
     }
-    // HASTA AQUÍ
+    // HASTA AQUï¿½
 }
 
 task clean(type: Delete) {

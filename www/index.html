@@ -37,8 +37,14 @@
             background-color: #f9fafb;
             font-family: 'Poppins', sans-serif;
             color: #222;
+            -webkit-user-select: none;
+            touch-action: manipulation;
         }
 
+        input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
         body {
             display: flex;
             justify-content: center;
@@ -154,15 +160,6 @@
     </div>
 
     <script>
-        // Registro del Service Worker mejorado
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/ColonCalcApp/www/sw.js')
-                    .then(reg => console.log('SW registrado'))
-                    .catch(err => console.error('Error SW', err));
-            });
-        }
-
         // Lógica del Modal
         (function() {
             const modal = document.getElementById("legalModal");
@@ -178,6 +175,27 @@
                 modal.style.display = "none";
             };
         })();
-    </script>
+        
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // Mantenemos TU ruta que ya funciona
+      navigator.serviceWorker.register('/ColonCalcApp/www/sw.js')
+        .then(reg => {
+          console.log('SW registrado en la ruta ColonCalcApp');
+          
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Esto es lo que ayudará a tu iPhone a saber que hay cambios
+                console.log('Nueva versión lista. Cierra y abre la app.');
+              }
+            };
+          };
+        })
+        .catch(err => console.error('Error en ruta SW:', err));
+    });
+  }
+</script>
 </body>
 </html>

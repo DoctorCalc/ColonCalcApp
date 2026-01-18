@@ -37,20 +37,19 @@
             background-color: #f9fafb;
             font-family: 'Poppins', sans-serif;
             color: #222;
-            -webkit-user-select: none;
-            touch-action: manipulation;
         }
 
-        input, textarea {
-            -webkit-user-select: text;
-            user-select: text;
-        }
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             text-align: center;
+            -webkit-user-select: none; /* Safari y Chrome en iOS/Android */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE/Edge */
+            user-select: none;         /* Estándar */
+            -webkit-touch-callout: none;
         }
 
         main.container {
@@ -69,6 +68,13 @@
             max-width: 250px;
             height: auto;
             margin-top: 30px;
+        }
+        .no-interact {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none; /* Esto evita el menú, pero también el clic */
         }
 
         .description-text {
@@ -95,14 +101,22 @@
             background-color: #1f7832;
             color: #fff;
             text-decoration: none;
+            cursor: pointer;
             border-radius: 12px;
+            font-family: inherit; /* Para que no cambie la letra Poppins */
             font-size: 1.05em;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.1s ease;
+            border: none;         /* Elimina el relieve y el borde gris */
+            border-bottom: 4px solid #145222;
+            text-align: center;   /* Centra el texto (el <button> no lo hace igual que el <a>) */
+            appearance: none;     /* Elimina estilos predeterminados de iOS/Android */
+            outline: none;        /* Evita el recuadro al hacer clic */
         }
 
         .calculator-button:active {
-            transform: scale(0.98);
+            transform: translateY(2px); 
+            border-bottom-width: 2px;
             background-color: #1a5e27;
         }
 
@@ -128,7 +142,7 @@
 <body>
 
     <main class="container">
-        <img src="Coloncalc.png" alt="Logotipo de ColonCalc" class="logo-image">
+        <img src="Coloncalc.png" alt="Logotipo de ColonCalc" class="logo-image no-interact">
 
         <p class="description-text">
             <strong>Aplicación para calcular el riesgo de cáncer colorrectal familiar y los intervalos de vigilancia según lesiones en la colonoscopia.</strong><br>
@@ -136,8 +150,13 @@
         </p>
 
         <div class="buttons-container">
-            <a href="Calculadora.html" class="calculator-button">Iniciar Calculadora</a>
-            <a href="Riesgo_CCR.html" class="calculator-button">Calcular Riesgo Familiar</a>
+            <button onclick="window.location.href='Calculadora.html'" class="calculator-button">
+            Iniciar Calculadora
+            </button>
+    
+            <button onclick="window.location.href='Riesgo_CCR.html'" class="calculator-button">
+            Calcular Riesgo Familiar
+            </button>
         </div>
     </main>
 

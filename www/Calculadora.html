@@ -248,7 +248,6 @@
         .animate-flash-twice {
             animation: pulse 1.5s ease-in-out 2; /* Repetir la animación 'pulse' 2 veces en 1.5 segundos (2 * 0.75s) */
         }
-        /* --- FIN NUEVA CLASE --- */
         /* --- ESTILOS ADICIONALES PARA MODALES DE IMAGEN --- */
         .image-modal-content {
             background-color: white;
@@ -264,7 +263,13 @@
             height: auto;
             border-radius: 8px;
         }
-        /* --- FIN ESTILOS MODALES DE IMAGEN --- */
+        .no-interact {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none; /* Esto evita el menú, pero también el clic */
+        }
         /* Permite transiciones suaves al hacer zoom */
         .zoomable {
             transition: max-width 0.3s ease-in-out; /* Cambiamos la transición a max-width */
@@ -356,8 +361,8 @@
 
     <header class="w-full max-w-md mb-6 bg-white rounded-2xl shadow-2xl p-4 card-container">
         <div class="flex items-center justify-between space-x-4">
-            <img src="Logo DoctorCalc.jpg" alt="Logo aplicaciones DoctorCalc" class="h-14 md:h-16 w-auto object-contain">
-            <img src="logodige.png" alt="Logo Digestivo" class="h-12 md:h-16 w-auto object-contain">
+            <img src="Logo DoctorCalc.jpg" alt="Logo aplicaciones DoctorCalc" class="h-14 md:h-16 w-auto object-contain no-interact">
+            <img src="logodige.png" alt="Logo Digestivo" class="h-12 md:h-16 w-auto object-contain no-interact">
         </div>
     </header>
 
@@ -554,7 +559,7 @@
                 Esta herramienta es una guía basada en los algoritmos de la ESGE 2020.
                 No sustituye el juicio clínico profesional.
                 <span class="footer-version">
-                        Versión 1.0.12. © Paco Casado. Granada 2025.
+                        Versión 1.0.13. © Paco Casado. Granada 2025.
                 </span>
             </em>
         </div>
@@ -1293,7 +1298,7 @@
                     colorectal cancer: European Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> y <em>"Endoscopic management of polyposis syndromes: European
                     Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> de 2019, publicadas en la revista Endoscopy 2019-2020. Está dirigida exclusivamente a profesionales de la salud. No sustituye al juicio clínico.
                     <span class="footer-version">
-                        Versión 1.0.12. © Paco Casado. Granada 2025.
+                        Versión 1.0.13. © Paco Casado. Granada 2025.
                     </span>
                 </div>
             </div>

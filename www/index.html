@@ -294,33 +294,39 @@
 
     // --- LÓGICA ANDROID ---
     let deferredPrompt;
+    const androidContainer = document.getElementById('android-install-container');
     const androidBtn = document.getElementById('android-install-button');
 
+    // 1. Capturamos el evento y guardamos la "oportunidad" de instalar
     window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // Mostramos el contenedor que tiene el botón + la X
-        document.getElementById('android-install-container').style.display = 'block';
+        console.log('Evento beforeinstallprompt capturado');
+        e.preventDefault(); // Detenemos el aviso automático de Chrome
+        deferredPrompt = e;  // Guardamos el evento para usarlo luego
+    
+        // Mostramos nuestro contenedor verde
+        androidContainer.style.display = 'block';
     });
 
-    androidBtn.addEventListener('click', () => {
+    // 2. Acción al pulsar TU botón verde
+    androidBtn.addEventListener('click', async () => {
         if (deferredPrompt) {
-            // Muestra la ventana oficial de instalación de Google
+            // Lanzamos por fin la ventana de instalación de Chrome
             deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('El usuario aceptó la instalación');
-                }
-                // Ocultamos el botón ya que se ha procesado
-                androidBtn.style.display = 'none';
-                deferredPrompt = null;
-            });
+        
+            // Esperamos a ver qué dice el usuario
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Usuario eligió: ${outcome}`);
+        
+            // Limpiamos la variable y ocultamos el botón
+            deferredPrompt = null;
+            androidContainer.style.display = 'none';
         }
     });
 
-    // Ocultar si ya está instalada (Android)
+    // 3. Si la app ya se instaló, ocultamos todo
     window.addEventListener('appinstalled', () => {
-        androidBtn.style.display = 'none';
+        console.log('App instalada con éxito');
+        androidContainer.style.display = 'none';
         deferredPrompt = null;
     });
 </script>

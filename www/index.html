@@ -137,6 +137,48 @@
             main.container { max-width: 500px; justify-content: space-evenly; }
             .logo-image { width: 50%; max-width: 180px; }
         }
+        /* Estilo para el aviso de instalación */
+        #ios-install-banner, #android-install-button {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            bottom: 20px;
+            left: 5%;
+            width: 90%;
+            background-color: #1f7832;
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 15px;
+            text-align: center;
+            border: none;
+        }
+
+        #ios-install-banner strong {
+            color: #4ade80; /* Un verde llamativo */
+        }
+        #android-install-button {
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        /* Estilo para la 'X' de cierre */
+        .close-banner {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .close-banner:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -176,6 +218,19 @@
                 Entiendo y Acepto
             </button>
         </div>
+    </div>
+    <div id="ios-install-banner">
+        <span class="close-banner" onclick="document.getElementById('ios-install-banner').style.display='none'">&times;</span>
+        <div style="margin-bottom: 5px;"><strong>¿Instalar ColonCalc?</strong></div>
+        Pulsa <img src="Ios-Share.png" style="width:18px; vertical-align: middle; filter: brightness(0) invert(1);"> 
+        y selecciona <strong>"Añadir a la pantalla de inicio"</strong>.
+    </div>
+
+    <div id="android-install-container" style="display:none; position: fixed; bottom: 20px; left: 5%; width: 90%; z-index: 9999;">
+        <span class="close-banner" onclick="document.getElementById('android-install-container').style.display='none'" style="z-index: 10000; top: 10px;">&times;</span>
+        <button id="android-install-button" style="width: 100%; background-color: #1f7832; color: white; padding: 16px; border-radius: 12px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-weight: bold;">
+            ✚ Instalar Aplicación ColonCalc
+        </button>
     </div>
 
     <script>
@@ -221,6 +276,53 @@
       event.preventDefault(); // Bloquea el gesto de pinza
     }
   }, { passive: false });
+  
+  const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    };
+
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    // --- LÓGICA IPHONE ---
+    if (isIos() && !isInStandaloneMode()) {
+        const iosBanner = document.getElementById('ios-install-banner');
+        iosBanner.style.display = 'block';
+        // Se oculta solo tras 12 segundos para dar tiempo a leer
+        setTimeout(() => { iosBanner.style.display = 'none'; }, 12000);
+    }
+
+    // --- LÓGICA ANDROID ---
+    let deferredPrompt;
+    const androidBtn = document.getElementById('android-install-button');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Mostramos el contenedor que tiene el botón + la X
+        document.getElementById('android-install-container').style.display = 'block';
+    });
+
+    androidBtn.addEventListener('click', () => {
+        if (deferredPrompt) {
+            // Muestra la ventana oficial de instalación de Google
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('El usuario aceptó la instalación');
+                }
+                // Ocultamos el botón ya que se ha procesado
+                androidBtn.style.display = 'none';
+                deferredPrompt = null;
+            });
+        }
+    });
+
+    // Ocultar si ya está instalada (Android)
+    window.addEventListener('appinstalled', () => {
+        androidBtn.style.display = 'none';
+        deferredPrompt = null;
+    });
 </script>
 </body>
 </html>

@@ -146,9 +146,9 @@
             width: 90%;
             background-color: #1f7832;
             color: white;
-            padding: 16px;
+            padding: 20px 16px 16px 16px; /* Más espacio arriba para la X */
             border-radius: 12px;
-            z-index: 9999;
+            z-index: 10001;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             font-size: 15px;
             text-align: center;
@@ -159,21 +159,27 @@
             color: #4ade80; /* Un verde llamativo */
         }
         #android-install-button {
-            cursor: pointer;
+            width: 100%;
+            background-color: white; /* Color contrastado para que parezca un botón */
+            color: #1f7832;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            cursor: pointer;
+            margin-top: 10px;
         }
         /* Estilo para la 'X' de cierre */
         .close-banner {
             position: absolute;
             top: 5px;
-            right: 10px;
-            font-size: 20px;
+            right: 12px;
+            font-size: 24px;
             font-weight: bold;
             color: white;
             cursor: pointer;
-            opacity: 0.7;
+            line-height: 1;
         }
 
         .close-banner:hover {
@@ -226,11 +232,10 @@
         y selecciona <strong>"Añadir a la pantalla de inicio"</strong>.
     </div>
 
-    <div id="android-install-container" style="display:none; position: fixed; bottom: 20px; left: 5%; width: 90%; z-index: 9999;">
-        <span class="close-banner" onclick="document.getElementById('android-install-container').style.display='none'" style="z-index: 10000; top: 10px;">&times;</span>
-        <button id="android-install-button" style="width: 100%; background-color: #1f7832; color: white; padding: 16px; border-radius: 12px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-weight: bold;">
-            ✚ Instalar Aplicación ColonCalc
-        </button>
+    <div id="android-install-container">
+        <span class="close-banner" onclick="document.getElementById('android-install-container').style.display='none'">&times;</span>
+        <div style="font-size: 15px; margin-bottom: 5px;">¿Quieres usar ColonCalc como una App?</div>
+        <button id="android-install-button">✚ INSTALAR AHORA</button>
     </div>
 
     <script>
@@ -292,41 +297,45 @@
         setTimeout(() => { iosBanner.style.display = 'none'; }, 12000);
     }
 
-    // --- LÓGICA ANDROID ---
+    // --- LÓGICA ANDROID COMPLETA ---
     let deferredPrompt;
     const androidContainer = document.getElementById('android-install-container');
     const androidBtn = document.getElementById('android-install-button');
 
-    // 1. Capturamos el evento y guardamos la "oportunidad" de instalar
+    // 1. CAPTURA DEL EVENTO (La parte que sustituimos)
     window.addEventListener('beforeinstallprompt', (e) => {
         console.log('Evento beforeinstallprompt capturado');
-        e.preventDefault(); // Detenemos el aviso automático de Chrome
-        deferredPrompt = e;  // Guardamos el evento para usarlo luego
+        e.preventDefault(); 
+        deferredPrompt = e;  
     
-        // Mostramos nuestro contenedor verde
-        androidContainer.style.display = 'block';
-    });
-
-    // 2. Acción al pulsar TU botón verde
-    androidBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            // Lanzamos por fin la ventana de instalación de Chrome
-            deferredPrompt.prompt();
-        
-            // Esperamos a ver qué dice el usuario
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`Usuario eligió: ${outcome}`);
-        
-            // Limpiamos la variable y ocultamos el botón
-            deferredPrompt = null;
-            androidContainer.style.display = 'none';
+        if (androidContainer) {
+            androidContainer.style.display = 'block';
         }
     });
 
-    // 3. Si la app ya se instaló, ocultamos todo
+    // 2. EJECUCIÓN DE LA INSTALACIÓN (Se queda igual)
+    if (androidBtn) {
+        androidBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Ocultamos el banner antes de mostrar el prompt nativo
+                androidContainer.style.display = 'none';
+            
+                deferredPrompt.prompt();
+            
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Usuario eligió: ${outcome}`);
+            
+                deferredPrompt = null;
+            }
+        });
+    }
+
+    // 3. DETECTAR SI SE INSTALÓ (Se queda igual)
     window.addEventListener('appinstalled', () => {
         console.log('App instalada con éxito');
-        androidContainer.style.display = 'none';
+        if (androidContainer) {
+            androidContainer.style.display = 'none';
+        }
         deferredPrompt = null;
     });
 </script>

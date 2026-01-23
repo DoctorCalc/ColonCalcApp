@@ -310,46 +310,70 @@
     }
 
     // --- LÓGICA ANDROID COMPLETA ---
-    let deferredPrompt;
-    const androidContainer = document.getElementById('android-install-container');
-    const androidBtn = document.getElementById('android-install-button');
+let deferredPrompt;
+const androidContainer = document.getElementById('android-install-container');
+const androidBtn = document.getElementById('android-install-button');
 
-    // 1. CAPTURA DEL EVENTO (La parte que sustituimos)
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('Evento beforeinstallprompt capturado');
-        e.preventDefault(); 
-        deferredPrompt = e;  
+// 1. CAPTURA DEL EVENTO (Chrome nativo)
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('Evento beforeinstallprompt capturado');
+    e.preventDefault(); 
+    deferredPrompt = e;  
     
-        if (androidContainer) {
-            androidContainer.style.display = 'block';
-        }
-    });
-
-    // 2. EJECUCIÓN DE LA INSTALACIÓN (Se queda igual)
-    if (androidBtn) {
-        androidBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                // Ocultamos el banner antes de mostrar el prompt nativo
-                androidContainer.style.display = 'none';
-            
-                deferredPrompt.prompt();
-            
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`Usuario eligió: ${outcome}`);
-            
-                deferredPrompt = null;
-            }
-        });
+    if (androidContainer) {
+        androidContainer.style.display = 'block';
     }
+});
 
-    // 3. DETECTAR SI SE INSTALÓ (Se queda igual)
-    window.addEventListener('appinstalled', () => {
-        console.log('App instalada con éxito');
-        if (androidContainer) {
-            androidContainer.style.display = 'none';
+// 1b. PLAN B: Si en 4 segundos no ha saltado el evento (Navegador de Google/Cámara)
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const isAndroid = /android/.test(navigator.userAgent.toLowerCase());
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        
+        // Si es Android, no está instalada y Chrome NO ha lanzado su evento
+        if (isAndroid && !isStandalone && !deferredPrompt) {
+            if (androidContainer && androidContainer.style.display !== 'block') {
+                // Cambiamos el contenido para dar instrucciones manuales
+                androidContainer.innerHTML = `
+                    <span class="close-banner" onclick="this.parentElement.style.display='none'">&times;</span>
+                    <div style="font-size: 14px; margin-bottom: 8px;">
+                        Para instalar: Pulsa la <strong>flecha (↓)</strong> arriba <br> o los <strong>tres puntos (⋮)</strong> y "Instalar".
+                    </div>
+                    <button id="android-manual-btn" style="width: 100%; background: white; color: #1f7832; border: none; padding: 10px; border-radius: 8px; font-weight: bold;">ENTENDIDO</button>
+                `;
+                androidContainer.style.display = 'block';
+                
+                // Botón para cerrar el aviso manualmente
+                document.getElementById('android-manual-btn').onclick = () => {
+                    androidContainer.style.display = 'none';
+                };
+            }
         }
-        deferredPrompt = null;
+    }, 4000);
+});
+
+// 2. EJECUCIÓN DE LA INSTALACIÓN (Solo si deferredPrompt existe)
+if (androidBtn) {
+    androidBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            androidContainer.style.display = 'none';
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Usuario eligió: ${outcome}`);
+            deferredPrompt = null;
+        }
     });
+}
+
+// 3. DETECTAR SI SE INSTALÓ
+window.addEventListener('appinstalled', () => {
+    console.log('App instalada con éxito');
+    if (androidContainer) {
+        androidContainer.style.display = 'none';
+    }
+    deferredPrompt = null;
+});
 </script>
 </body>
 </html>

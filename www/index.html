@@ -328,37 +328,36 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // 1b. PLAN B: Si en 4 segundos no ha saltado el evento (Navegador de Google/Cámara)
 window.addEventListener('load', () => {
     setTimeout(() => {
-    const isAndroid = /android/.test(navigator.userAgent.toLowerCase());
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        const isAndroid = /android/.test(navigator.userAgent.toLowerCase());
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+        
+        // Detectamos específicamente el visor de Google (GSA)
+        const isGoogleApp = /gsa/i.test(navigator.userAgent.toLowerCase());
 
-    // Si es Android y no está instalada
-    if (isAndroid && !isStandalone) {
-        // Si deferredPrompt NO existe, es que NO estamos en Chrome (estamos en el visor de Google/Cámara)
-        if (!deferredPrompt) {
-            console.log("Detectado navegador sin beforeinstallprompt (Visor de Google). Mostrando ayuda...");
+        // Solo actuamos si es Android, no está instalada y NO ha saltado el evento de Chrome
+        if (isAndroid && !isStandalone && !deferredPrompt) {
             
-            if (androidContainer) {
-                // Forzamos el nuevo contenido de ayuda
+            // Si el banner ya está visible (porque Chrome sí lanzó el evento), no hacemos nada
+            if (androidContainer && androidContainer.style.display !== 'block') {
+                
+                console.log("Modo ayuda: Navegador de Google detectado.");
+                
                 androidContainer.innerHTML = `
                     <span class="close-banner" onclick="this.parentElement.style.display='none'">&times;</span>
                     <div style="font-size: 14px; margin-bottom: 8px; line-height: 1.4;">
-                        <strong style="color: #4ade80;">Para instalar en tu móvil:</strong><br>
-                        Pulsa la <strong>flecha (↓)</strong> arriba a la derecha <br> o los <strong>tres puntos (⋮)</strong> y "Instalar".
+                        <strong style="color: #4ade80;">Instalación:</strong><br>
+                        Pulsa la <strong>flecha (↓)</strong> arriba <br> o los <strong>tres puntos (⋮)</strong> y "Instalar".
                     </div>
-                    <button id="android-manual-btn" style="width: 100%; background: white; color: #1f7832; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;">ENTENDIDO</button>
+                    <button id="android-manual-btn" style="width: 100%; background: white; color: #1f7832; border: none; padding: 10px; border-radius: 8px; font-weight: bold;">ENTENDIDO</button>
                 `;
-                
-                // Forzamos visibilidad con !important a través de JS
                 androidContainer.style.setProperty('display', 'block', 'important');
 
-                // Asignar evento al nuevo botón
                 document.getElementById('android-manual-btn').onclick = () => {
                     androidContainer.style.display = 'none';
                 };
             }
         }
-    }
-}, 3000); // 3 segundos es suficiente espera
+    }, 6000); // Subimos a 6 segundos para dar tiempo de sobra a Chrome
 });
 
 // 2. EJECUCIÓN DE LA INSTALACIÓN (Solo si deferredPrompt existe)

@@ -137,54 +137,66 @@
             main.container { max-width: 500px; justify-content: space-evenly; }
             .logo-image { width: 50%; max-width: 180px; }
         }
-        /* Estilo para el aviso de instalación */
-        #ios-install-banner, #android-install-button {
-            display: none; /* Oculto por defecto */
-            position: fixed;
-            bottom: 20px;
-            left: 5%;
-            width: 90%;
-            background-color: #1f7832;
-            color: white;
-            padding: 20px 16px 16px 16px; /* Más espacio arriba para la X */
-            border-radius: 12px;
-            z-index: 10001;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            font-size: 15px;
-            text-align: center;
-            border: none;
-        }
+        /* Clase común para ambos banners (iOS y el contenedor de Android) */
+.install-banner-style {
+    display: none; /* Se activa por JS */
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centrado perfecto en pantalla */
+    width: 90%;
+    max-width: 400px;
+    background-color: #1f7832;
+    color: white;
+    padding: 25px 15px 15px 15px;
+    border-radius: 15px;
+    z-index: 10001;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    text-align: center;
+    box-sizing: border-box;
+}
 
-        #ios-install-banner strong {
-            color: #4ade80; /* Un verde llamativo */
-        }
-        #android-install-button {
-            width: 100%;
-            background-color: white; /* Color contrastado para que parezca un botón */
-            color: #1f7832;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        /* Estilo para la 'X' de cierre */
-        .close-banner {
-            position: absolute;
-            top: 5px;
-            right: 12px;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            line-height: 1;
-        }
+/* Aplicamos la clase a ambos IDs */
+#ios-install-banner, #android-install-container {
+    /* Heredan todo lo de arriba */
+}
 
-        .close-banner:hover {
-            opacity: 1;
-        }
+/* El botón blanco específico de Android */
+#android-install-button {
+    display: block;
+    width: 100%;
+    background-color: white;
+    color: #1f7832;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+#ios-install-banner strong {
+    color: #4ade80;
+}
+
+/* La X de cierre */
+.close-banner {
+    position: absolute;
+    top: 5px;
+    right: 12px;
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.close-banner:hover {
+    opacity: 1;
+}
     </style>
 </head>
 <body>
@@ -225,17 +237,17 @@
             </button>
         </div>
     </div>
-    <div id="ios-install-banner">
-        <span class="close-banner" onclick="document.getElementById('ios-install-banner').style.display='none'">&times;</span>
+    <div id="ios-install-banner" class="install-banner-style">
+        <span class="close-banner" onclick="this.parentElement.style.display='none'">&times;</span>
         <div style="margin-bottom: 5px;"><strong>¿Instalar ColonCalc?</strong></div>
-        Pulsa <img src="Ios-Share.png" style="width:18px; vertical-align: middle; filter: brightness(0) invert(1);"> 
-        y selecciona <strong>"Añadir a la pantalla de inicio"</strong>.
+        Pulsa el icono de compartir <img src="tu-icono-compartir.png" style="width:18px; vertical-align: middle; filter: brightness(0) invert(1);"> y selecciona <strong>"Añadir a la pantalla de inicio"</strong>.
     </div>
 
-    <div id="android-install-container">
-        <span class="close-banner" onclick="document.getElementById('android-install-container').style.display='none'">&times;</span>
-        <div style="font-size: 15px; margin-bottom: 5px;">¿Quieres usar ColonCalc como una App?</div>
-        <button id="android-install-button">✚ INSTALAR AHORA</button>
+    <div id="android-install-container" class="install-banner-style">
+        <span class="close-banner" onclick="this.parentElement.style.display='none'">&times;</span>
+        <div style="margin-bottom: 5px;"><strong>¿Usar como App?</strong></div>
+        <div style="font-size: 14px;">Para acceso rápido y sin conexión.</div>
+        <button id="android-install-button">✚ Instalar Ahora</button>
     </div>
 
     <script>

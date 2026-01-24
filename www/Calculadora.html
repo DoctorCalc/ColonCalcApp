@@ -283,6 +283,28 @@
             max-width: 200% !important; /* <--- AÑADIR !important */ 
             cursor: zoom-out;
         }
+        #zoom-notice-colon {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(31, 120, 50, 0.9); /* Tu verde corporativo */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            z-index: 2000; /* Un valor alto para que se vea sobre la modal */
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-family: sans-serif;
+            text-align: center;      /* Centra el texto si hay varias líneas */
+            max-width: 80%;          /* Evita que el banner toque los bordes del móvil */
+            line-height: 1.3;        /* Mejora el espacio entre líneas si salta */
+            display: flex;           /* Ayuda a mantener el contenido centrado */
+            justify-content: center;
+            align-items: center;
+        }
         
         /* Contenedor de Scroll DEDICADO (Método 2, el más fiable) */
         .scroll-container-image {
@@ -559,7 +581,7 @@
                 Esta herramienta es una guía basada en los algoritmos de la ESGE 2020.
                 No sustituye el juicio clínico profesional.
                 <span class="footer-version">
-                        Versión 1.0.18. © Paco Casado. Granada 2025.
+                        Versión 1.0.19. © Paco Casado. Granada 2025.
                 </span>
             </em>
         </div>
@@ -667,14 +689,32 @@
             
             // --- FUNCIONES DE CONTROL DE MODALES ---
             
-            const openModal = (modalElement) => {
+            const openModal = (modalElement, isImageModal = false) => {
                 modalElement.classList.remove('hidden');
                 modalElement.style.display = 'flex';
+                // --- AVISO DE ZOOM (AÑADIDO) ---
+                // Creamos el aviso solo si no existe ya uno (evita duplicados)
+                if (isImageModal && !document.getElementById('zoom-notice-colon')) {
+                    const notice = document.createElement('div');
+                    notice.id = 'zoom-notice-colon';
+                    notice.innerText = 'Pulsa sobre la imagen para ampliar';
+                    document.body.appendChild(notice);
+
+                    // Desvanecer y eliminar a los 3 segundos
+                    setTimeout(() => {
+                        if (notice) {
+                            notice.style.opacity = '0';
+                            setTimeout(() => notice.remove(), 800);
+                        }
+                    }, 3000);
+                }
             };
 
             const closeModal = (modalElement) => {
                 if (!modalElement) return;
-
+                // LIMPIEZA DE AVISO (AÑADIDO)
+                const existingNotice = document.getElementById('zoom-notice-colon');
+                if (existingNotice) existingNotice.remove();
                 // LIMPIEZA DE SEGURIDAD:
                 // Al cerrar cualquier modal, nos aseguramos de quitar zooms por si acaso
                 bostonImage.classList.remove('zoomed');
@@ -691,6 +731,9 @@
                 imgElement.addEventListener('click', () => {
                     // Alterna la clase 'zoomed' al tocar
                     imgElement.classList.toggle('zoomed');
+                    // --- LIMPIEZA INMEDIATA (AÑADIDO) ---
+                    const existingNotice = document.getElementById('zoom-notice-colon');
+                    if (existingNotice) existingNotice.remove();
                 });
             };
             
@@ -788,21 +831,21 @@
             // --- EVENT LISTENERS DE LAS MODALES DE IMAGEN ---
             
             // Boston
-            openBostonModalButton.addEventListener('click', () => openModal(bostonModal));
+            openBostonModalButton.addEventListener('click', () => openModal(bostonModal, true));
             closeBostonModalButton.addEventListener('click', () => closeModal(bostonModal));
             bostonModal.addEventListener('click', (e) => {
                 if (e.target === bostonModal) closeModal(bostonModal);
             });
 
             // París
-            openParisModalButton.addEventListener('click', () => openModal(parisModal));
+            openParisModalButton.addEventListener('click', () => openModal(parisModal, true));
             closeParisModalButton.addEventListener('click', () => closeModal(parisModal));
             parisModal.addEventListener('click', (e) => {
                 if (e.target === parisModal) closeModal(parisModal);
             });
 
             // JNET
-            openJNETModalButton.addEventListener('click', () => openModal(jnetModal));
+            openJNETModalButton.addEventListener('click', () => openModal(jnetModal, true));
             closeJNETModalButton.addEventListener('click', () => closeModal(jnetModal));
             jnetModal.addEventListener('click', (e) => {
                 if (e.target === jnetModal) closeModal(jnetModal);
@@ -1304,7 +1347,7 @@
                     colorectal cancer: European Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> y <em>"Endoscopic management of polyposis syndromes: European
                     Society of Gastrointestinal Endoscopy (ESGE) Guideline"</em> de 2019, publicadas en la revista Endoscopy 2019-2020. Está dirigida exclusivamente a profesionales de la salud. No sustituye al juicio clínico.
                     <span class="footer-version">
-                        Versión 1.0.18. © Paco Casado. Granada 2025.
+                        Versión 1.0.19. © Paco Casado. Granada 2025.
                     </span>
                 </div>
             </div>

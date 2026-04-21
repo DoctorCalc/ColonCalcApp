@@ -470,7 +470,7 @@ select,input[type=number],input[type=text]{
         <em>
             Esta aplicación implementa las recomendaciones de las guías de la ESGE sobre CCR familiar de 2019 (Lynch y síndromes polipósicos), para hacer una evaluación rápida del riesgo. No sustituye la valoración clínica. Para criterios complejos (confirmación de síndromes genéticos, pruebas moleculares o decisiones de derivación), siga el protocolo local o derive a Unidad de Alto Riesgo.
             <span class="footer-version">
-                        Versión 1.0.19. © Paco Casado. Granada 2025.
+                        Versión 1.0.20. © Paco Casado. Granada 2025.
             </span>
         </em>
     </div>
@@ -607,7 +607,7 @@ riskChecks.forEach(chk => {
 
 
   // Evaluate
-  const msgNoRiesgo = "No se identifican criterios de alto riesgo de cáncer colorrectal. Realizar cribado con test de sangre oculta en heces cada 2 años según el Programa de Detección Precoz de CCR, si está dentro del rango de edad (50 - 69 años). Si es mayor de 69 años, dependerá de su estado de salud y su historial clínico. En este caso, consulte a su médico.";
+  const msgNoRiesgo = "No se identifican criterios de alto riesgo de cáncer colorrectal. Realizar cribado con test de sangre oculta en heces cada 2 años según el Programa de Detección Precoz de CCR, si está dentro del rango de edad (50 - 74 años). Si es mayor de 74 años, dependerá de su estado de salud y su historial clínico. En este caso, consulte a su médico.";
   evaluateBtn?.addEventListener('click', function(){
     try{
       safeHide(noAnte, lesionCalculator, familySection, preguntaNumFPG, preguntaEdadFPG);
